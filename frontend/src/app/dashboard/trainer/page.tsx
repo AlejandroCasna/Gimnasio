@@ -1,67 +1,92 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Header from '@/components/Header'
+import { useAuth } from '@/hooks/useAuth'
+import { useRouter } from 'next/navigation'
+import type { Client } from '@/lib/types'
+import { api } from '@/lib/api'
+import AltaClientes from '@/components/trainer/AltaClientes'
+import ClientProfile from '@/components/trainer/ClientProfile'
 import {
   Tabs,
   TabsList,
   TabsTrigger,
   TabsContent,
 } from '@/components/ui/tabs'
-import AltaClientes from '@/components/trainer/AltaClientes'
-import type { Client } from '@/lib/types'
-import { api } from '@/lib/api'
 
-export default function TrainerDashboard() {
-  const [clients, setClients] = useState<Client[]>([])
+export default function TrainerDashboardPage() {
+  // ——— Hooks: SIEMPRE al inicio ———
+  const { user, loading } = useAuth()
+  const router            = useRouter()
 
+  const [clients, setClients]         = useState<Client[]>([])
+  const [selectedId, setSelectedId]   = useState<number | null>(null)
+
+  // redirección de no-Trainer
+  useEffect(() => {
+    if (!loading && !user?.groups.includes('Trainer')) {
+      router.replace('/profile')
+    }
+  }, [user, loading, router])
+
+  // carga inicial de clientes
   const reloadClients = () => {
     api.get<Client[]>('/trainer/clients/')
       .then(res => setClients(res.data))
-      .catch(err => console.error('Error cargando clientes:', err))
+      .catch(console.error)
   }
-
   useEffect(reloadClients, [])
 
+  // ——— Ahora los retornos condicionales ———
+  if (loading) {
+    return <p>Cargando…</p>
+  }
+  if (!user?.groups.includes('Trainer')) {
+    return null
+  }
+
+  // ——— Renderizado final ———
   return (
-    <>
-      <Header />
+    <Tabs defaultValue="alta">
+      <TabsList>
+        <TabsTrigger value="alta">Alta de clientes</TabsTrigger>
+        <TabsTrigger value="clientes">Clientes</TabsTrigger>
+        <TabsTrigger value="rutina">Rutina</TabsTrigger>
+      </TabsList>
 
-      <div className="min-h-screen bg-black bg-[url('/logo.png')] bg-cover bg-center bg-opacity-20">
-        <div className="max-w-5xl mx-auto py-8 px-4 text-white">
-          <Tabs defaultValue="alta">
-            <TabsList>
-              <TabsTrigger value="alta">Alta de clientes</TabsTrigger>
-              <TabsTrigger value="clientes">Clientes</TabsTrigger>
-              <TabsTrigger value="rutina">Rutina</TabsTrigger>
-            </TabsList>
+      <TabsContent value="alta">
+        <AltaClientes onCreated={reloadClients} />
+      </TabsContent>
 
-            <TabsContent value="alta">
-              <AltaClientes onCreated={reloadClients} />
-            </TabsContent>
+      <TabsContent value="clientes">
+        {selectedId ? (
+          <>
+            <button
+              className="mb-4 text-sm text-blue-400 underline"
+              onClick={() => setSelectedId(null)}
+            >
+              ← Volver a la lista
+            </button>
+            <ClientProfile clientId={selectedId} />
+          </>
+        ) : clients.length === 0 ? (
+          <p className="text-center">No tienes aún clientes.</p>
+        ) : (
+          clients.map(c => (
+            <div
+              key={c.id}
+              className="mb-2 p-2 bg-zinc-800 rounded cursor-pointer hover:bg-zinc-700"
+              onClick={() => setSelectedId(c.id)}
+            >
+              {c.username} — {c.first_name} {c.last_name}
+            </div>
+          ))
+        )}
+      </TabsContent>
 
-            <TabsContent value="clientes">
-              {clients.length === 0 ? (
-                <p className="text-center">No tienes aún clientes.</p>
-              ) : (
-                clients.map(c => (
-                  <div
-                    key={c.id}
-                    className="mb-2 p-2 bg-zinc-800 rounded"
-                  >
-                    {c.username} — {c.first_name} {c.last_name} (
-                    {c.email}, {c.phone})
-                  </div>
-                ))
-              )}
-            </TabsContent>
-
-            <TabsContent value="rutina">
-              <p>Gestión de Rutinas (Implementación pendiente)</p>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </div>
-    </>
+      <TabsContent value="rutina">
+        <p>Gestión de Rutinas (Implementación pendiente)</p>
+      </TabsContent>
+    </Tabs>
   )
 }

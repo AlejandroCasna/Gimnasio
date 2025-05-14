@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { api } from '@/lib/api'
 
+
 interface FormData {
   username: string
   first_name: string
@@ -34,19 +35,29 @@ export default function AltaClientes({ onCreated }: AltaClientesProps) {
     try {
       await api.post('/trainer/create-client/', form)
       onCreated()
-      setForm({
-        username: '',
-        first_name: '',
-        last_name: '',
-        email: '',
-        phone: '',
-        tipo: 'distancia',
-      })
+      setForm({ username: '', first_name: '', last_name: '', email: '', phone: '', tipo: 'distancia' })
     } catch (err: any) {
       console.error(err)
-      setError(err.response?.data?.detail || 'Error desconocido')
+      const data = err.response?.data
+      if (data) {
+        // Si viene detail (por ejemplo PermissionDenied), lo usamos
+        if (data.detail) {
+          setError(data.detail)
+        } else {
+          // Si viene un objeto de errores por campo, lo recorremos
+          const messages = Object.entries(data)
+            .map(([field, msgs]) =>
+              // msgs puede ser string[] o string
+              `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`
+            )
+          setError(messages.join('\n'))
+        }
+      } else {
+        setError('Error desconocido')
+      }
     }
   }
+  
 
   return (
     <div className="space-y-3">

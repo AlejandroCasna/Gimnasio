@@ -10,3 +10,14 @@ export interface Client {
     tipo: 'distancia' | 'presencial' | 'grupal';
   }
   
+
+  export interface Profile {
+    username:   string
+    first_name: string
+    last_name:  string
+    email:      string
+    phone:      string
+    weight:     number
+    age:        number
+    height:     number
+  }

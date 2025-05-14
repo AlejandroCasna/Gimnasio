@@ -1,25 +1,38 @@
 // frontend/src/app/layout.tsx
-import './globals.css'
+import './global.css'
+import { AuthProvider } from '@/hooks/useAuth'
+import Header           from '@/components/Header'
 
+export const metadata = {
+  title: 'El Bajo Entrena',
+}
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang="es">
-      <body
-        className="
-          min-h-screen
-          bg-black
-          bg-[url('/logo.png')]
-          bg-center
-          bg-no-repeat
-          bg-contain
-          text-white
-        "
-      >
-
-
-        {children}
-      </body>
-    </html>
+<html lang="es">{/* evita que aparezcan espacios aquí */}
+<head/>{/* idem aquí */}
+<body
+  className="
+    min-h-screen
+    bg-black
+    text-white
+    bg-[url('/logo.png')]
+    bg-cover
+    bg-center
+    bg-opacity-20
+  "
+>
+  <AuthProvider>
+    <Header />
+    <main className="relative z-10 flex-grow">
+      {children}
+    </main>
+  </AuthProvider>
+</body>
+</html>
   )
 }
