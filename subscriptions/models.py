@@ -1,10 +1,12 @@
-from django.db import models
+
 
 # Create your models here.
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
@@ -21,3 +23,38 @@ class Profile(models.Model):
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
+
+
+class Exercise(models.Model):
+    name      = models.CharField(max_length=200, unique=True)
+    video_url = models.URLField(blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.name
+
+class Routine(models.Model):
+    client      = models.ForeignKey(User, on_delete=models.CASCADE, related_name='routines')
+    name        = models.CharField(max_length=200)
+    week_number = models.PositiveIntegerField(default=1)
+    created_at  = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} (Semana {self.week_number})"
+
+class RoutineExercise(models.Model):
+    MON, TUE, WED, THU, FRI, SAT, SUN = range(1,8)
+    DAY_CHOICES = [
+        (MON, 'Lunes'), (TUE, 'Martes'), (WED, 'Miércoles'),
+        (THU, 'Jueves'), (FRI, 'Viernes'),
+        (SAT, 'Sábado'), (SUN, 'Domingo'),
+    ]
+
+    routine      = models.ForeignKey(Routine, on_delete=models.CASCADE, related_name='items')
+    exercise     = models.ForeignKey(Exercise, on_delete=models.PROTECT)
+    day_of_week  = models.IntegerField(choices=DAY_CHOICES)
+    reps_range   = models.CharField(max_length=50, help_text="Ej: 8-12")
+    order        = models.PositiveIntegerField(help_text="Orden dentro del día")
+
+    class Meta:
+        ordering = ['routine__week_number', 'day_of_week', 'order']

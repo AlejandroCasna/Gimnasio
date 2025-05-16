@@ -1,124 +1,156 @@
+// frontend/src/components/trainer/ClientProfile.tsx
 'use client'
-import { useState, useEffect, ChangeEvent } from 'react'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+
+
+import ClientRoutine from './ClientRoutine'
+import { useState, useEffect } from 'react'
+import { useAuth } from '@/hooks/useAuth'
 import { api } from '@/lib/api'
 import type { Profile } from '@/lib/types'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from '@/components/ui/tabs'
 
 interface ClientProfileProps {
-  clientId: number
+  clientId?: number
 }
 
 export default function ClientProfile({ clientId }: ClientProfileProps) {
+  const { user, loading } = useAuth()
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [form, setForm]       = useState<Partial<Profile>>({})
   const [editing, setEditing] = useState(false)
-  const [form, setForm] = useState<{
-    weight: string
-    age: string
-    height: string
-    phone: string
-  }>({ weight: '', age: '', height: '', phone: '' })
 
   useEffect(() => {
-    api.get<Profile>(`/trainer/${clientId}/profile/`)
+    if (loading || !user) return
+    const url = clientId && user.groups.includes('Trainer')
+      ? `/trainer/${clientId}/profile/`
+      : '/me/'
+
+    api.get<Profile>(url)
       .then(res => {
         setProfile(res.data)
-        setForm({
-          weight: res.data.weight?.toString() || '',
-          age: res.data.age?.toString() || '',
-          height: res.data.height?.toString() || '',
-          phone: res.data.phone,
-        })
+        setForm(res.data)
       })
-  }, [clientId])
+      .catch(console.error)
+  }, [loading, user, clientId])
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setForm(prev => ({
-      ...prev,
-      [name]: value,
-    }))
-  }
+  if (loading)   return <p>Cargando…</p>
+  if (!user)     return <p className="text-red-500">No autorizado</p>
+  if (!profile)  return <p>Cargando perfil…</p>
+
+  const isTrainerView = Boolean(clientId && user.groups.includes('Trainer'))
+  const saveUrl = isTrainerView
+    ? `/trainer/${clientId}/profile/`
+    : '/me/'
 
   const handleSave = async () => {
-    const payload = {
-      weight: parseFloat(form.weight),
-      age: parseInt(form.age),
-      height: parseFloat(form.height),
-      phone: form.phone,
-    }
-    await api.put(`/trainer/${clientId}/profile/`, payload)
+    await api.put<Profile>(saveUrl, form)
     setEditing(false)
-    const res = await api.get<Profile>(`/trainer/${clientId}/profile/`)
+    const res = await api.get<Profile>(saveUrl)
     setProfile(res.data)
+    setForm(res.data)
   }
 
-  if (!profile) return <p>Cargando perfil...</p>
-
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold">Perfil del Cliente</h2>
+    <div className="max-w-md mx-auto p-6 bg-zinc-900 text-white rounded">
+      <h1 className="text-2xl font-bold mb-4">
+        { isTrainerView
+            ? `Perfil del cliente ${profile.username}`
+            : 'Mi Perfil'
+        }
+      </h1>
 
-      {(['username','first_name','last_name','email'] as const).map(field => (
-        <Input key={field} readOnly value={profile[field] || ''} />
-      ))}
+      <Tabs defaultValue="perfil">
+        {/* Aquí quitamos className de TabsList */}
+        <div className="mb-4">
+          <TabsList>
+            <TabsTrigger value="perfil">Perfil</TabsTrigger>
+            <TabsTrigger value="pago">Pago</TabsTrigger>
+            <TabsTrigger value="rutina">Rutina</TabsTrigger>
+            <TabsTrigger value="chat">Chat</TabsTrigger>
+          </TabsList>
+        </div>
 
-      {editing ? (
-        <>
-          <Input
-            name="weight"
-            placeholder="Peso (kg)"
-            type="number"
-            value={form.weight}
-            onChange={handleChange}
-          />
-          <Input
-            name="age"
-            placeholder="Edad"
-            type="number"
-            value={form.age}
-            onChange={handleChange}
-          />
-          <Input
-            name="height"
-            placeholder="Altura (cm)"
-            type="number"
-            value={form.height}
-            onChange={handleChange}
-          />
-          <Input
-            name="phone"
-            placeholder="Teléfono"
-            type="tel"
-            value={form.phone}
-            onChange={handleChange}
-          />
+        {/* PESTAÑA PERFIL */}
+        {/* Quitamos className de TabsContent */}
+        <TabsContent value="perfil">
+          <div className="space-y-4">
+            <Input readOnly value={profile.username}   placeholder="Usuario" />
+            <Input readOnly value={profile.first_name} placeholder="Nombre"  />
+            <Input readOnly value={profile.last_name}  placeholder="Apellido"/>
 
-          <Button onClick={handleSave}>Guardar</Button>
-        </>
-      ) : (
-        <>
-          <p>Peso: {profile.weight} kg</p>
-          <p>Edad: {profile.age} años</p>
-          <p>Altura: {profile.height} cm</p>
-          <p>Teléfono: {profile.phone}</p>
-          <Button onClick={() => setEditing(true)}>Editar perfil</Button>
-        </>
-      )}
+            {editing
+              ? (
+                <>
+                  <Input
+                    type="email"
+                    placeholder="Correo"
+                    value={form.email   ?? ''}
+                    onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                  />
+                  <Input
+                    placeholder="Teléfono"
+                    value={form.phone   ?? ''}
+                    onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Peso (kg)"
+                    value={form.weight  ?? ''}
+                    onChange={e => setForm(f => ({ ...f, weight: Number(e.target.value) }))}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Edad"
+                    value={form.age     ?? ''}
+                    onChange={e => setForm(f => ({ ...f, age: Number(e.target.value) }))}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Altura (cm)"
+                    value={form.height  ?? ''}
+                    onChange={e => setForm(f => ({ ...f, height: Number(e.target.value) }))}
+                  />
+                  <Button onClick={handleSave} className="w-full">Guardar</Button>
+                </>
+              )
+              : (
+                <>
+                  <p>📧 {profile.email}</p>
+                  <p>📱 {profile.phone}</p>
+                  <p>⚖️ {profile.weight} kg</p>
+                  <p>🎂 {profile.age} años</p>
+                  <p>📏 {profile.height} cm</p>
+                  <Button onClick={() => setEditing(true)} className="w-full">
+                    Editar perfil
+                  </Button>
+                </>
+              )
+            }
+          </div>
+        </TabsContent>
 
-      {/* Placeholder de Pago, Rutina y Chat */}
-      <div>
-        <h3>Pago</h3>
-        <p>En producción</p>
-      </div>
-      <div>
-        <h3>Rutina</h3>
-        <p>Pendiente de implementación</p>
-      </div>
-      <div>
-        <h3>Chat</h3>
-        <p>Pendiente de implementación</p>
-      </div>
+        {/* PESTAÑA PAGO */}
+        <TabsContent value="pago">
+          <p>💳 Pago: <em>(en producción)</em></p>
+        </TabsContent>
+
+        {/* PESTAÑA RUTINA */}
+        <TabsContent value="rutina">
+        <ClientRoutine />
+        </TabsContent>
+
+        {/* PESTAÑA CHAT */}
+        <TabsContent value="chat">
+          <p>💬 Chat: <em>(próximamente)</em></p>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

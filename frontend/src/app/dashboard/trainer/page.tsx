@@ -1,28 +1,29 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAuth } from '@/hooks/useAuth'
-import { useRouter } from 'next/navigation'
-import type { Client } from '@/lib/types'
-import { api } from '@/lib/api'
-import AltaClientes from '@/components/trainer/AltaClientes'
-import ClientProfile from '@/components/trainer/ClientProfile'
+import { useAuth }               from '@/hooks/useAuth'
+import { useRouter }             from 'next/navigation'
+import type { Client }           from '@/lib/types'
+import { api }                   from '@/lib/api'
+import AltaClientes              from '@/components/trainer/AltaClientes'
+import RutinaManager from '@/components/trainer/RutinaManager'
 import {
   Tabs,
   TabsList,
   TabsTrigger,
   TabsContent,
 } from '@/components/ui/tabs'
+import ClientProfile from '@/components/trainer/ClientProfile'
 
 export default function TrainerDashboardPage() {
   // ——— Hooks: SIEMPRE al inicio ———
   const { user, loading } = useAuth()
   const router            = useRouter()
 
-  const [clients, setClients]         = useState<Client[]>([])
-  const [selectedId, setSelectedId]   = useState<number | null>(null)
+  const [clients, setClients]       = useState<Client[]>([])
+  const [selectedId, setSelectedId] = useState<number | null>(null)
 
-  // redirección de no-Trainer
+  // redirección si no es Trainer
   useEffect(() => {
     if (!loading && !user?.groups.includes('Trainer')) {
       router.replace('/profile')
@@ -37,7 +38,7 @@ export default function TrainerDashboardPage() {
   }
   useEffect(reloadClients, [])
 
-  // ——— Ahora los retornos condicionales ———
+  // ——— Retornos condicionales ———
   if (loading) {
     return <p>Cargando…</p>
   }
@@ -45,19 +46,22 @@ export default function TrainerDashboardPage() {
     return null
   }
 
-  // ——— Renderizado final ———
+  // ——— Renderizado principal ———
   return (
     <Tabs defaultValue="alta">
       <TabsList>
         <TabsTrigger value="alta">Alta de clientes</TabsTrigger>
         <TabsTrigger value="clientes">Clientes</TabsTrigger>
-        <TabsTrigger value="rutina">Rutina</TabsTrigger>
+        <TabsTrigger value="rutina">Rutinas</TabsTrigger>
+        
       </TabsList>
 
+      {/* Alta de clientes */}
       <TabsContent value="alta">
         <AltaClientes onCreated={reloadClients} />
       </TabsContent>
 
+      {/* Listado o detalle de clientes */}
       <TabsContent value="clientes">
         {selectedId ? (
           <>
@@ -84,8 +88,9 @@ export default function TrainerDashboardPage() {
         )}
       </TabsContent>
 
+      {/* Pestaña de Rutina (pendiente) */}
       <TabsContent value="rutina">
-        <p>Gestión de Rutinas (Implementación pendiente)</p>
+      <RutinaManager onSaved={reloadClients} />
       </TabsContent>
     </Tabs>
   )

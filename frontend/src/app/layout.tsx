@@ -27,7 +27,6 @@ export default function RootLayout({
   "
 >
   <AuthProvider>
-    <Header />
     <main className="relative z-10 flex-grow">
       {children}
     </main>
