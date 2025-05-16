@@ -21,18 +21,21 @@ export interface Client {
   groups:     string[]
 }
 
-  export interface Exercise {
-    id: number
-    name: string
-    video_url: string
-  }
-  
-  export interface RoutineExercise {
-    day_of_week: number
-    order:      number
-    exercise:   Pick<Exercise, 'name' | 'video_url'>  // solo enviamos nombre y url al crear
-    reps_range: string
-  }
+export interface Exercise {
+  id?: number
+  name: string
+  video_url: string
+}
+
+export interface RoutineExercise {
+  id?: number
+  // ahora incluimos todo el Exercise, no sólo name/video_url
+  exercise: Exercise
+  day_of_week: number
+  reps_range: string
+  order: number
+}
+
   
   export interface Routine {
     week_number: number

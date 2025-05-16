@@ -12,6 +12,7 @@ router.register(r'trainer/exercises', ExerciseViewSet, basename='trainer-exercis
 router.register(r'trainer/routines', RoutineViewSet, basename='trainer-routines')
 
 
+
 urlpatterns = [
     path("admin/", admin.site.urls),
      # JWT auth

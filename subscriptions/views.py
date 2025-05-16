@@ -128,13 +128,11 @@ class TrainerViewSet(viewsets.GenericViewSet):
             qs = client.routines.all()
             return Response(RoutineSerializer(qs, many=True).data)
 
-        data = request.data.copy()
-        data['client'] = client.pk    # <-- importante
+        data = request.data
 
+        inst = None
         if request.method == 'PUT' and data.get('id'):
             inst = Routine.objects.get(pk=data['id'], client=client)
-        else:
-            inst = None
 
         ser = RoutineSerializer(instance=inst, data=data)
         ser.is_valid(raise_exception=True)

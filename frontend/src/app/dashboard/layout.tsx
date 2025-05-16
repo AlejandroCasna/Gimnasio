@@ -1,10 +1,12 @@
 // frontend/src/app/dashboard/layout.tsx
 import Header from '@/components/Header'
+import { headers } from 'next/headers'
 
 export const metadata = {
   title: 'Dashboard – El Bajo Entrena'
 }
 
+headers
 export default function DashboardLayout({
   children
 }: {
