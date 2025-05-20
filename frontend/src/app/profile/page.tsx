@@ -22,3 +22,5 @@ export default function ProfilePage() {
   // Renderiza las 4 pestañas, arrancando por tu formulario
   return <ClientProfile />
 }
+
+

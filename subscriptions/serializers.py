@@ -128,3 +128,10 @@ class RoutineSerializer(serializers.ModelSerializer):
         for it in items_data:
             RoutineExercise.objects.create(routine=instance, **it)
         return instance
+
+class TrainerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'first_name', 'last_name', 'username']
+
+        

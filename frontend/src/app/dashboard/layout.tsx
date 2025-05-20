@@ -1,5 +1,5 @@
 // frontend/src/app/dashboard/layout.tsx
-import Header from '@/components/Header'
+
 import { headers } from 'next/headers'
 
 export const metadata = {

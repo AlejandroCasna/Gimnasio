@@ -1,8 +1,9 @@
 // frontend/src/app/layout.tsx
 import './global.css'
-import { AuthProvider } from '@/hooks/useAuth'
-import Header           from '@/components/Header'
+import Providers from '@/components/Providers'
+import Header    from '@/components/Header'
 
+// metadata puede quedarse aquí porque esto NO está marcado 'use client'
 export const metadata = {
   title: 'El Bajo Entrena',
 }
@@ -13,25 +14,26 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-<html lang="es">{/* evita que aparezcan espacios aquí */}
-<head/>{/* idem aquí */}
-<body
-  className="
-    min-h-screen
-    bg-black
-    text-white
-    bg-[url('/logo.png')]
-    bg-cover
-    bg-center
-    bg-opacity-20
-  "
->
-  <AuthProvider>
-    <main className="relative z-10 flex-grow">
-      {children}
-    </main>
-  </AuthProvider>
-</body>
-</html>
+    <html lang="es">
+      <body className="
+        min-h-screen
+        bg-white text-zinc-900
+        dark:bg-zinc-900 dark:text-white
+        transition-colors
+      ">
+        <div
+          className="absolute inset-0 bg-cover bg-center -z-10"
+          style={{ backgroundImage: "url('/gimnasio.jpg')" }}
+        />
+        <Providers>
+          {/* Header está dentro de Providers */}
+          <Header />
+
+          <main className="mx-auto max-w-5xl p-4">
+            {children}
+          </main>
+        </Providers>
+      </body>
+    </html>
   )
 }

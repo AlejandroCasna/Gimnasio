@@ -1,12 +1,13 @@
 // frontend/src/components/trainer/ClientProfile.tsx
 'use client'
 
-
+import ChatSidebar from '@/components/chat/ChatSidebar'
+import ChatWindow  from '@/components/chat/ChatWindow'
 import ClientRoutine from './ClientRoutine'
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { api } from '@/lib/api'
-import type { Profile } from '@/lib/types'
+import type { Profile, ChatThread } from '@/lib/types'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -25,6 +26,7 @@ export default function ClientProfile({ clientId }: ClientProfileProps) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [form, setForm]       = useState<Partial<Profile>>({})
   const [editing, setEditing] = useState(false)
+  const [selectedThread, setSelectedThread] = useState<ChatThread | null>(null)
 
   useEffect(() => {
     if (loading || !user) return
@@ -146,9 +148,18 @@ export default function ClientProfile({ clientId }: ClientProfileProps) {
         <ClientRoutine />
         </TabsContent>
 
-        {/* PESTAÑA CHAT */}
+ {/* CHAT */}
         <TabsContent value="chat">
-          <p>💬 Chat: <em>(próximamente)</em></p>
+          <div className="flex h-80">
+            <ChatSidebar onSelect={t => setSelectedThread(t)} />
+            {selectedThread ? (
+              <ChatWindow threadId={selectedThread.id} />
+            ) : (
+              <div className="flex-1 flex items-center justify-center text-zinc-500">
+                Selecciona un chat…
+              </div>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
     </div>

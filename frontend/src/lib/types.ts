@@ -44,3 +44,34 @@ export interface RoutineExercise {
     client:  number
     items:   RoutineExercise[]
   }
+
+  
+  // frontend/src/lib/types.ts
+
+export interface Trainer {
+  id: number
+  first_name: string
+  last_name: string
+  // …
+}
+
+export interface ChatThread {
+  id: number
+  client: number
+  trainer: number
+  trainer_username: string
+  client_username:  string
+  last_message_preview: string
+}
+
+export interface Message {
+  timestamp: string | number | Date
+  created: string | number | Date
+  id: number
+  thread: number
+  author: number
+  author_username: string
+  text: string
+  created_at: string
+}
+

@@ -26,6 +26,8 @@ urlpatterns = [
     path('api/', include('subscriptions.urls')),
     path('api/', include(router.urls)),
     path('api/me/routine/', my_routine, name='my-routine'),
+    path('api/chat/', include('chat.urls')),
+    
 
 ]
 

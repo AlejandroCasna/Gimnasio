@@ -9,12 +9,15 @@ from django.utils.http import urlsafe_base64_encode
 from rest_framework import permissions, viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
-from .models import Profile, Exercise, Routine
+from .models import Profile, Exercise, Routine 
+
 from .serializers import (
     ClientSerializer,
     ProfileSerializer,
     ExerciseSerializer,
     RoutineSerializer,
+    TrainerSerializer,
+    
 )
 
 
@@ -171,3 +174,10 @@ def my_routine(request):
 
 
 
+class TrainerListViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Endpoint para que clientes listéis los trainers disponibles.
+    """
+    queryset = User.objects.filter(groups__name='Trainer')
+    serializer_class = TrainerSerializer
+    permission_classes = [permissions.IsAuthenticated]
