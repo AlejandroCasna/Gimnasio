@@ -3,37 +3,40 @@ from rest_framework import serializers
 from .models      import ChatThread, Message
 
 class MessageSerializer(serializers.ModelSerializer):
-    author_username = serializers.CharField(
-        source='author.username',
-        read_only=True
-    )
+    author_username = serializers.ReadOnlyField(source='author.username')
 
     class Meta:
-        model  = Message
-        fields = [
-            'id',
-            'thread',             # id del hilo
-            'author',             # sigue presente en la respuesta
-            'author_username',    # nombre de usuario en la respuesta
-            'text',
-            'timestamp',
-        ]
-        read_only_fields = [
-            'author',             # <— ahora no es obligatorio en el POST
-            'author_username',
-            'timestamp',
-        ]
+        model = Message
+        fields = ['id', 'thread', 'text', 'timestamp', 'author_username']
+        read_only_fields = ['timestamp', 'author_username']
 
 class ChatThreadSerializer(serializers.ModelSerializer):
-    client           = serializers.PrimaryKeyRelatedField(read_only=True)
-    trainer          = serializers.PrimaryKeyRelatedField(queryset=User.objects.filter(groups__name='Trainer'))
-    trainer_username = serializers.CharField(source='trainer.username', read_only=True)
+    client_username  = serializers.SerializerMethodField()
+    trainer_username = serializers.SerializerMethodField()
     last_message     = serializers.SerializerMethodField()
 
     class Meta:
         model  = ChatThread
-        fields = ['id', 'client', 'trainer', 'trainer_username', 'last_message']
+        fields = [
+            'id',
+            'client',
+            'trainer',
+            'client_username',
+            'trainer_username',
+            'last_message',
+        ]
+
+    def get_client_username(self, obj):
+        return obj.client.username
+
+    def get_trainer_username(self, obj):
+        return obj.trainer.username if obj.trainer else None
 
     def get_last_message(self, obj):
         msg = obj.messages.order_by('-timestamp').first()
         return MessageSerializer(msg).data if msg else None
+    
+class TrainerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'first_name', 'last_name']

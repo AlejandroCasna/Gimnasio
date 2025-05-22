@@ -6,11 +6,17 @@ import { useRouter } from 'next/navigation'
 import Link          from 'next/link'
 import { Dumbbell, Instagram, MessageSquare } from 'lucide-react'
 import { useAuth }   from '@/hooks/useAuth'
+import { useState, useEffect } from 'react'
 
 export default function Header() {
   const { theme, setTheme } = useTheme()
   const { user, loading }   = useAuth()
   const router              = useRouter()
+
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const toggleTheme = () =>
     setTheme(theme === 'dark' ? 'light' : 'dark')

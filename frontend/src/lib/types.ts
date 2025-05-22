@@ -1,5 +1,7 @@
 // frontend/src/lib/types.ts
 
+import { ReactNode } from "react"
+
 export interface Profile {
   username:   string
   first_name: string
@@ -49,6 +51,7 @@ export interface RoutineExercise {
   // frontend/src/lib/types.ts
 
 export interface Trainer {
+  username: string
   id: number
   first_name: string
   last_name: string
@@ -65,6 +68,7 @@ export interface ChatThread {
 }
 
 export interface Message {
+  content: ReactNode
   timestamp: string | number | Date
   created: string | number | Date
   id: number

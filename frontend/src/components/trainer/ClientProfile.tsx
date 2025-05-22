@@ -60,7 +60,7 @@ export default function ClientProfile({ clientId }: ClientProfileProps) {
   }
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-zinc-900 text-white rounded">
+    <div className="max-w-4xl w-full mx-auto p-8 bg-zinc-900 text-white rounded-lg">
       <h1 className="text-2xl font-bold mb-4">
         { isTrainerView
             ? `Perfil del cliente ${profile.username}`
@@ -150,17 +150,18 @@ export default function ClientProfile({ clientId }: ClientProfileProps) {
 
  {/* CHAT */}
         <TabsContent value="chat">
-          <div className="flex h-80">
-            <ChatSidebar onSelect={t => setSelectedThread(t)} />
-            {selectedThread ? (
-              <ChatWindow threadId={selectedThread.id} />
-            ) : (
-              <div className="flex-1 flex items-center justify-center text-zinc-500">
-                Selecciona un chat…
-              </div>
-            )}
+        <div className="flex gap-4 h-[600px]"> {/* ajusta altura fija o min-h */}
+          <ChatSidebar onSelect={t => setSelectedThread(t)} />
+          <div className="flex-1">
+            {selectedThread
+              ? <ChatWindow threadId={selectedThread.id} />
+              : <div className="flex h-full items-center justify-center text-zinc-500">
+                  Selecciona un chat…
+                </div>
+            }
           </div>
-        </TabsContent>
+        </div>
+      </TabsContent>
       </Tabs>
     </div>
   )

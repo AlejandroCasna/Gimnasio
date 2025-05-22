@@ -1,4 +1,3 @@
-// frontend/src/components/chat/ChatWindow.tsx
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
@@ -10,44 +9,52 @@ interface Props {
 }
 
 export default function ChatWindow({ threadId }: Props) {
-  const [msgs, setMsgs]   = useState<Message[]>([])
-  const [text, setText]   = useState('')
+  const [msgs, setMsgs] = useState<Message[]>([])
+  const [text, setText] = useState('')
   const endRef = useRef<HTMLDivElement>(null)
 
-  // 1) cargar mensajes cuando cambie threadId
   useEffect(() => {
     api.get<Message[]>(`/chat/threads/${threadId}/messages/`)
       .then(r => setMsgs(r.data))
       .catch(console.error)
   }, [threadId])
 
-  // 2) cada vez que msgs cambia, scroll al final
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [msgs])
 
-  // 3) enviar uno nuevo
-  function send() {
+  const send = () => {
     if (!text.trim()) return
     api.post<Message>('/chat/messages/', { thread: threadId, text })
       .then(r => {
-        setMsgs([...msgs, r.data])
+        setMsgs(ms => [...ms, r.data])
         setText('')
       })
-      .catch(console.error)
+      .catch(err => console.error(err.response?.data || err))
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-zinc-900 p-4">
-      <div className="flex-1 overflow-auto mb-2">
-        {msgs.map(m => (
-          <div key={m.id} className="mb-2">
-            <div className="text-xs text-zinc-500">
-              {new Date(m.timestamp).toLocaleTimeString()}
+    <div className="flex-1 flex flex-col bg-zinc-900 p-4 rounded-lg">
+      <div className="flex-1 overflow-auto space-y-2 mb-4">
+        {msgs.map(m => {
+          const isMe = m.author_username === localStorage.getItem('user')
+          return (
+            <div
+              key={m.id}
+              className={`p-2 rounded-lg max-w-[80%] ${
+                isMe ? 'bg-red-600 self-end' : 'bg-zinc-700 self-start'
+              }`}
+            >
+              <div className="text-xs text-zinc-400 mb-1">
+                {new Date(m.timestamp).toLocaleDateString('es-AR', {
+                  day: '2-digit', month: 'short', year: 'numeric'
+                })}{' '}
+                {new Date(m.timestamp).toLocaleTimeString()}
+              </div>
+              <div className="text-white">{m.text}</div>
             </div>
-            <div className="p-2 bg-zinc-800 rounded">{m.text}</div>
-          </div>
-        ))}
+          )
+        })}
         <div ref={endRef} />
       </div>
 

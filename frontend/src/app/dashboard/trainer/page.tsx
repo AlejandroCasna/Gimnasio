@@ -9,6 +9,9 @@ import AltaClientes from '@/components/trainer/AltaClientes'
 import ClientProfile from '@/components/trainer/ClientProfile'
 import RutinaManager from '@/components/trainer/RutinaManager'
 import TrainerExercises from '@/components/trainer/TrainerExercises'
+import ChatSidebar       from '@/components/chat/ChatSidebar'
+import ChatWindow        from '@/components/chat/ChatWindow'
+import type { ChatThread } from '@/lib/types'
 import {
   Tabs,
   TabsList,
@@ -22,6 +25,7 @@ export default function TrainerDashboardPage() {
 
   const [clients, setClients] = useState<Client[]>([])
   const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [selectedThread, setSelectedThread] = useState<ChatThread | null>(null)
 
   // redirige si no es trainer
   useEffect(() => {
@@ -48,6 +52,7 @@ export default function TrainerDashboardPage() {
         <TabsTrigger value="clientes">Clientes</TabsTrigger>
         <TabsTrigger value="rutina">Rutinas</TabsTrigger>
         <TabsTrigger value="ejercicios">Ejercicios</TabsTrigger>
+        <TabsTrigger value="chat">Chat</TabsTrigger>
       </TabsList>
 
       {/* Alta de clientes */}
@@ -91,6 +96,20 @@ export default function TrainerDashboardPage() {
       <TabsContent value="ejercicios">
         <TrainerExercises />
       </TabsContent>
+
+      {/* CHAT */}
+     <TabsContent value="chat">
+       <div className="flex gap-4 h-[500px]">
+         <ChatSidebar onSelect={t => setSelectedThread(t)} />
+         {selectedThread ? (
+           <ChatWindow threadId={selectedThread.id} />
+         ) : (
+           <div className="flex-1 flex items-center justify-center text-zinc-500">
+             Selecciona un chat…
+           </div>
+         )}
+       </div>
+     </TabsContent>
     </Tabs>
   )
 }

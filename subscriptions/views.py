@@ -10,16 +10,24 @@ from rest_framework import permissions, viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from .models import Profile, Exercise, Routine 
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.serializers import ModelSerializer
+
 
 from .serializers import (
     ClientSerializer,
     ProfileSerializer,
     ExerciseSerializer,
     RoutineSerializer,
-    TrainerSerializer,
+    SimpleUserSerializer,
     
 )
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def list_trainers(request):
+    qs = User.objects.filter(groups__name='Trainer')
+    return Response(SimpleUserSerializer(qs, many=True).data)
 
 # 1) Endpoint /api/me/ para que cualquier user vea/edite su propio perfil
 @api_view(['GET', 'PUT'])
@@ -179,5 +187,6 @@ class TrainerListViewSet(viewsets.ReadOnlyModelViewSet):
     Endpoint para que clientes listéis los trainers disponibles.
     """
     queryset = User.objects.filter(groups__name='Trainer')
-    serializer_class = TrainerSerializer
+    serializer_class = SimpleUserSerializer
     permission_classes = [permissions.IsAuthenticated]
+    

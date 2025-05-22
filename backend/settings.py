@@ -185,3 +185,7 @@ MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
 CORS_ALLOW_CREDENTIALS = True
+
+
+MERCADOPAGO_ACCESS_TOKEN = os.getenv("TEST-4173181044033485-052206-fadcef160fc3de83037cf17bec62a9ec-62527211", "")
+FRONTEND_URL            = os.getenv("FRONTEND_URL", "http://localhost:3000")

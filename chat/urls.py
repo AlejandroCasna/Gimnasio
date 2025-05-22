@@ -1,9 +1,7 @@
-# chat/urls.py
-from rest_framework.routers import DefaultRouter
-from .views import ChatThreadViewSet, MessageViewSet
+# chat/urls.py  ← opcional, ya NO lo incluyes desde backend/urls.py
 
-router = DefaultRouter()
-router.register('threads',  ChatThreadViewSet, basename='chat-threads')
-router.register('messages', MessageViewSet,    basename='chat-messages')
+from django.urls import path
 
-urlpatterns = router.urls
+urlpatterns = [
+    # … o incluso vacío
+]
