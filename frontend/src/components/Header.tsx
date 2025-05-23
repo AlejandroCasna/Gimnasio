@@ -24,7 +24,9 @@ export default function Header() {
   const logout = () => {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
-    router.push('/login')
+    localStorage.removeItem('user')
+    // 2) redirige al home recargando toda la app
+    window.location.href = '/'
   }
 
   return (

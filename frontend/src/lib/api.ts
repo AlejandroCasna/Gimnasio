@@ -3,7 +3,7 @@ import axios from 'axios'
 
 
 export const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api',  // o '/api' + rewrite
+  baseURL: 'http://127.0.0.1:8000/api',  
   withCredentials: true,
 })
 
@@ -17,7 +17,7 @@ api.interceptors.request.use(config => {
   return config
 })
 
-// --- AÑADE ESTE BLOQUE ---
+
 api.interceptors.response.use(
   response => response,
   async error => {
@@ -46,4 +46,23 @@ api.interceptors.response.use(
     return Promise.reject(error)
   }
 )
-// --- FIN DEL BLOQUE ---
+
+
+export interface PreferenceResponse {
+  id: string;
+  init_point: string;
+}
+
+
+export async function createPreference(data: { product_id: string, amount: number }) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/crear_preference/`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }
+  )
+  if (!res.ok) throw new Error(await res.text())
+  return res.json() as Promise<{ id: string, init_point: string }>
+}

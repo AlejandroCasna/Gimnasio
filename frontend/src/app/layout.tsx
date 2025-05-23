@@ -3,7 +3,6 @@ import './global.css'
 import Providers from '@/components/Providers'
 import Header    from '@/components/Header'
 
-// metadata puede quedarse aquí porque esto NO está marcado 'use client'
 export const metadata = {
   title: 'El Bajo Entrena',
 }
@@ -15,9 +14,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
+      <head>
+        {/* Cargamos MercadoPago JS v2 */}
+        <script
+          src="https://sdk.mercadopago.com/js/v2"
+          async
+        ></script>
+      </head>
       <body className="
-        min-h-screen
-        bg-white text-zinc-900
+        min-h-screen bg-white text-zinc-900
         dark:bg-zinc-900 dark:text-white
         transition-colors
       ">
@@ -26,9 +31,7 @@ export default function RootLayout({
           style={{ backgroundImage: "url('/gimnasio.jpg')" }}
         />
         <Providers>
-          {/* Header está dentro de Providers */}
           <Header />
-
           <main className="mx-auto max-w-5xl p-4">
             {children}
           </main>

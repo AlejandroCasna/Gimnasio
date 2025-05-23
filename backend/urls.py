@@ -7,7 +7,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.routers import DefaultRouter
 
 # Importa tus views
-from backend.payments_views import generar_pago
+
 from subscriptions.views import (
     me,
     my_routine,
@@ -45,12 +45,12 @@ urlpatterns = [
     path('api/accounts/reset/done/',               auth_views.PasswordResetCompleteView.as_view(),
                                           name='password_reset_complete'),
 
-    # — Pagos —
-    path('api/generar-pago/', generar_pago, name='generar-pago'),
+    
 
     # — “Soy yo” y mi rutina de cliente —
     path('api/me/',         me,         name='user-me'),
     path('api/my-routine/', my_routine, name='my-routine'),
+    path('api/', include('subscriptions.urls')),
 
     # — TODO el resto del router DRF bajo /api/ —
     path('api/', include(router.urls)),

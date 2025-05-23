@@ -12,7 +12,10 @@ from rest_framework.response import Response
 from .models import Profile, Exercise, Routine 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.serializers import ModelSerializer
-
+import json
+from django.contrib.auth import get_user_model
+from django.http import JsonResponse, HttpResponseBadRequest
+from .models import Payment
 
 from .serializers import (
     ClientSerializer,
@@ -190,3 +193,29 @@ class TrainerListViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = SimpleUserSerializer
     permission_classes = [permissions.IsAuthenticated]
     
+
+User = get_user_model()
+
+def register_client(request):
+    if request.method != 'POST':
+        return HttpResponseBadRequest("Método no permitido")
+
+    data = json.loads(request.body)
+    pref_id  = data.get('pref_id')
+    username = data.get('username')
+    email    = data.get('email')
+    password = data.get('password')
+
+    # 1) Verificar pago aprobado
+    try:
+        payment = Payment.objects.get(preference_id=pref_id, status='approved')
+    except Payment.DoesNotExist:
+        return HttpResponseBadRequest("Pago no aprobado o inválido")
+
+    # 2) Crear usuario
+    user = User.objects.create_user(username=username, email=email, password=password)
+    # 3) Vincular usuario al pago
+    payment.user = user
+    payment.save()
+
+    return JsonResponse({ "ok": True })

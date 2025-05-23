@@ -58,3 +58,29 @@ class RoutineExercise(models.Model):
 
     class Meta:
         ordering = ['routine__week_number', 'day_of_week', 'order']
+
+class Payment(models.Model):
+    preference_id = models.CharField(max_length=200, unique=True)
+    status        = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending',  'Pending'),
+            ('approved', 'Approved'),
+            ('failure',  'Failure'),
+        ],
+        default='pending'
+    )
+    amount     = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    # Nuevo campo: vincula el pago al usuario una vez que se registre
+    user = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='payments'
+    )
+
+    def __str__(self):
+        return f"{self.preference_id} ({self.status})"
