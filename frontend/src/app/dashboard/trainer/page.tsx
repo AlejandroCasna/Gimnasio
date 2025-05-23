@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import type { Client } from '@/lib/types'
 import { api } from '@/lib/api'
+import RunningManager from '@/components/trainer/RunningManager'
 import AltaClientes from '@/components/trainer/AltaClientes'
 import ClientProfile from '@/components/trainer/ClientProfile'
 import RutinaManager from '@/components/trainer/RutinaManager'
@@ -12,6 +13,7 @@ import TrainerExercises from '@/components/trainer/TrainerExercises'
 import ChatSidebar       from '@/components/chat/ChatSidebar'
 import ChatWindow        from '@/components/chat/ChatWindow'
 import type { ChatThread } from '@/lib/types'
+import Link from 'next/link'
 import {
   Tabs,
   TabsList,
@@ -52,6 +54,7 @@ export default function TrainerDashboardPage() {
         <TabsTrigger value="clientes">Clientes</TabsTrigger>
         <TabsTrigger value="rutina">Rutinas</TabsTrigger>
         <TabsTrigger value="ejercicios">Ejercicios</TabsTrigger>
+        <TabsTrigger value="running">Running</TabsTrigger>
         <TabsTrigger value="chat">Chat</TabsTrigger>
       </TabsList>
 
@@ -96,6 +99,39 @@ export default function TrainerDashboardPage() {
       <TabsContent value="ejercicios">
         <TrainerExercises />
       </TabsContent>
+
+
+    {/* Running */}
+      <TabsContent value="running">
+        {selectedId == null ? (
+          // 1) No hay cliente seleccionado todavía: mostramos lista
+          clients.length === 0 ? (
+            <p className="text-center">No tienes aún clientes.</p>
+          ) : (
+            clients.map(c => (
+              <div
+                key={c.id}
+                className="mb-2 p-2 bg-zinc-800 rounded cursor-pointer hover:bg-zinc-700"
+                onClick={() => setSelectedId(c.id)}
+              >
+                {c.username} — {c.first_name} {c.last_name}
+              </div>
+            ))
+          )
+        ) : (
+          // 2) Cliente elegido: renderizamos RunningManager y el botón de volver
+          <>
+            <button
+              className="mb-4 text-sm text-blue-400 underline"
+              onClick={() => setSelectedId(null)}
+            >
+              ← Cambiar cliente
+            </button>
+            <RunningManager clientId={selectedId} />
+          </>
+        )}
+      </TabsContent>
+
 
       {/* CHAT */}
      <TabsContent value="chat">

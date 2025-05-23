@@ -5,10 +5,12 @@ from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.routers import DefaultRouter
+from subscriptions import running_views
 
 # Importa tus views
 
 from subscriptions.views import (
+    RunningPlanViewSet,
     me,
     my_routine,
     TrainerListViewSet,
@@ -25,6 +27,9 @@ router.register(r'trainers',    TrainerListViewSet,   basename='trainers')     #
 router.register(r'trainer',     TrainerViewSet,       basename='trainer')      # gestión de clientes/rutinas (solo trainer)
 router.register(r'exercises',   SubExerciseViewSet,   basename='exercises')    # ejercicios (solo trainer)
 router.register(r'routines',    SubRoutineViewSet,    basename='routines')     # rutinas (solo trainer)
+router.register(r'running-plans', RunningPlanViewSet, basename='runningplan')
+router.register(r'trainer/running-plans', RunningPlanViewSet, basename='runningplans')
+
 
 # — Chat —
 router.register(r'chat/threads',  ChatThreadViewSet,   basename='chat-threads')
@@ -51,7 +56,7 @@ urlpatterns = [
     path('api/me/',         me,         name='user-me'),
     path('api/my-routine/', my_routine, name='my-routine'),
     path('api/', include('subscriptions.urls')),
-
+    
     # — TODO el resto del router DRF bajo /api/ —
     path('api/', include(router.urls)),
 ]

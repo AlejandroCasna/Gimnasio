@@ -3,6 +3,7 @@
 from django.contrib.auth.models import User,Group
 from rest_framework import serializers
 from .models import Profile, Exercise, Routine, RoutineExercise
+from .models import RunningPlan, RunningItem
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -138,3 +139,35 @@ class SimpleUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id','username' ,'first_name', 'last_name']
+
+
+
+
+class RunningItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RunningItem
+        fields = '__all__'
+
+class RunningPlanSerializer(serializers.ModelSerializer):
+    items = RunningItemSerializer(many=True)
+    class Meta:
+        model = RunningPlan
+        fields = ['id','client','name','week_number','created_at','items']
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')
+        plan = RunningPlan.objects.create(**validated_data)
+        for item in items_data:
+            RunningItem.objects.create(plan=plan, **item)
+        return plan
+
+    def update(self, instance, validated_data):
+        items_data = validated_data.pop('items')
+        instance.name = validated_data.get('name', instance.name)
+        instance.week_number = validated_data.get('week_number', instance.week_number)
+        instance.save()
+        # eliminar viejos y crear nuevos (o haz lógica de patch)
+        instance.items.all().delete()
+        for item in items_data:
+            RunningItem.objects.create(plan=instance, **item)
+        return instance

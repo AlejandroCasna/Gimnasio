@@ -79,3 +79,21 @@ export interface Message {
   created_at: string
 }
 
+export interface RunningItem {
+  id?: number
+  day_of_week: number         // 1=Lunes … 7=Domingo
+  distance_value: number
+  distance_unit: 'km'|'m'
+  work_time: string           // "mm:ss"
+  series: number
+  rest_time: string           // "mm:ss"
+  training_type: string       // p.ej. 'rodaje', 'fartlek'…
+}
+
+export interface RunningPlan {
+  id?:          number
+  client_id:    number
+  week_number:  number
+  name:         string
+  items:        RunningItem[]
+}

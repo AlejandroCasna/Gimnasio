@@ -13,6 +13,8 @@ from .models import Profile, Exercise, Routine
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.serializers import ModelSerializer
 import json
+from .models import RunningPlan
+from .serializers import RunningPlanSerializer
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse, HttpResponseBadRequest
 from .models import Payment
@@ -219,3 +221,27 @@ def register_client(request):
     payment.save()
 
     return JsonResponse({ "ok": True })
+
+
+class IsTrainerOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        # solo trainers pueden crear/editar
+        if view.action in ['create','update','partial_update','destroy']:
+            return request.user and request.user.groups.filter(name='Trainer').exists()
+        return True
+
+class RunningPlanViewSet(viewsets.ModelViewSet):
+    queryset = RunningPlan.objects.all()
+    serializer_class = RunningPlanSerializer
+    permission_classes = [permissions.IsAuthenticated, IsTrainerOrReadOnly]
+
+    def get_queryset(self):
+        # trainers ven todos, clientes solo los suyos
+        user = self.request.user
+        if user.groups.filter(name='Trainer').exists():
+            return RunningPlan.objects.all()
+        return RunningPlan.objects.filter(client=user)
+    
+
+
+    
