@@ -7,6 +7,8 @@ import { api } from '@/lib/api'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
+console.log('BACKEND_URL en cliente:', process.env.NEXT_PUBLIC_BACKEND_URL)
+
 export default function LoginPage() {
   const router = useRouter()
   const [username, setUsername] = useState('')
@@ -17,15 +19,31 @@ export default function LoginPage() {
     e.preventDefault()
     setError(null)
 
+    const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || ''
+    console.log('🚀 BACKEND URL:', BACKEND)
+    
+    
     try {
       // 1) Pido access + refresh
-      const { data } = await api.post('/token/', { username, password })
+      const res = await fetch(`${BACKEND}/api/token/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      })
+
+      if (!res.ok) {
+        // Si la credencial es incorrecta, saco el detalle (si viene) o mensaje genérico
+        const errData = await res.json().catch(() => null)
+        throw new Error(errData?.detail || 'Usuario o contraseña incorrectos')
+      }
+
+      const data = await res.json() as { access: string, refresh: string }
 
       // 2) Guardo en localStorage
       if (typeof window !== 'undefined') {
         localStorage.setItem('accessToken', data.access)
         localStorage.setItem('refreshToken', data.refresh)
-        // guardamos usuario para Header
+        // guardamos usuario para mostrarlo en el Header
         localStorage.setItem('user', username)
       }
 
@@ -33,7 +51,7 @@ export default function LoginPage() {
       router.push('/dashboard/trainer')
     } catch (err: any) {
       console.error('Login error:', err)
-      setError(err?.response?.data?.detail || 'Usuario o contraseña incorrectos')
+      setError(err.message)
     }
   }
 
