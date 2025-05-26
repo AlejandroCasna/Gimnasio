@@ -1,14 +1,14 @@
 // frontend/src/lib/api.ts
 import axios from 'axios'
 
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL!.replace(/\/+$/, ''); // sin slash final
 
 export const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api',  
-  withCredentials: true,
+  baseURL: `${BACKEND}/api/`,
+  withCredentials: false,
 })
 
-
-// Antes de cada petición inyectamos el accessToken actualizado
+// inyectar el token en cada petición
 api.interceptors.request.use(config => {
   if (typeof window !== 'undefined' && config.headers) {
     const token = localStorage.getItem('accessToken')
@@ -17,29 +17,24 @@ api.interceptors.request.use(config => {
   return config
 })
 
-
+// refresco de token (401)
 api.interceptors.response.use(
   response => response,
   async error => {
     const originalRequest = error.config
-    // si recibimos 401 y aún no hemos reintentado
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
       try {
-        // pedimos nuevo access token con el refresh token
+        // ¡ojo! usa BACKEND, no localhost
         const { data } = await axios.post(
-          'http://127.0.0.1:8000/api/token/refresh/',
-          { refresh: localStorage.getItem('refreshToken') }
+          `${BACKEND}/api/token/refresh/`,
+          { refresh: localStorage.getItem('refreshToken') },
         )
-        // guardamos el nuevo access token
         localStorage.setItem('accessToken', data.access)
-        // actualizamos cabeceras por defecto y de la petición original
         api.defaults.headers.Authorization = `Bearer ${data.access}`
         originalRequest.headers.Authorization = `Bearer ${data.access}`
-        // reintentamos la petición fallida
         return api(originalRequest)
       } catch (refreshError) {
-        // si el refresh falla, cae al catch de la llamada original
         return Promise.reject(refreshError)
       }
     }
@@ -47,16 +42,10 @@ api.interceptors.response.use(
   }
 )
 
-
-export interface PreferenceResponse {
-  id: string;
-  init_point: string;
-}
-
-
+/** helper para crear preference de MP */
 export async function createPreference(data: { product_id: string, amount: number }) {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/crear_preference/`,
+    `${BACKEND}/api/crear_preference/`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
