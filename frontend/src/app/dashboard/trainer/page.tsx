@@ -13,7 +13,6 @@ import TrainerExercises from '@/components/trainer/TrainerExercises'
 import ChatSidebar       from '@/components/chat/ChatSidebar'
 import ChatWindow        from '@/components/chat/ChatWindow'
 import type { ChatThread } from '@/lib/types'
-import Link from 'next/link'
 import {
   Tabs,
   TabsList,
