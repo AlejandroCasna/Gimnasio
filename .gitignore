@@ -1,0 +1,22 @@
+# Node & Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
+
+# Python & Django
+backend/__pycache__/
+backend/*.sqlite3
+backend/staticfiles/
+backend/media/
+.env
+.venv/
+venv/
+__pycache__/
+
+# Editor / OS
+*.log
+*.pyc
+.DS_Store
+.idea/
+.vscode/
