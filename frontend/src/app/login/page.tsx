@@ -3,11 +3,12 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { api } from '@/lib/api'
+
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
 console.log('BACKEND_URL en cliente:', process.env.NEXT_PUBLIC_BACKEND_URL)
+
 
 export default function LoginPage() {
   const router = useRouter()
@@ -20,7 +21,7 @@ export default function LoginPage() {
     setError(null)
 
     const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || ''
-    console.log('🚀 BACKEND URL:', BACKEND)
+   console.log('🚀 LOGIN va a llamar a:', `${BACKEND}/api/token/`)
     
     
     try {

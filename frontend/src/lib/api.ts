@@ -1,7 +1,10 @@
 // frontend/src/lib/api.ts
 import axios from 'axios'
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL!.replace(/\/+$/, ''); // sin slash final
+
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || ''
+console.log('🚀 FRONTEND usando BACKEND URL =', BACKEND)
+
 
 export const api = axios.create({
   baseURL: `${BACKEND}/api/`,
@@ -25,7 +28,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
       try {
-        // ¡ojo! usa BACKEND, no localhost
+        // ¡ojo! usa BACKEND
         const { data } = await axios.post(
           `${BACKEND}/api/token/refresh/`,
           { refresh: localStorage.getItem('refreshToken') },
