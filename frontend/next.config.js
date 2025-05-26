@@ -1,15 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Para poder usar `next export`
   output: 'export',
+  // Para rutas con slash al final
   trailingSlash: true,
+  // Ignorar errores de ESLint que detengan el build
   eslint: {
-    // evitar que ESLint bloquee el build
     ignoreDuringBuilds: true,
   },
+  // Ignorar errores de TypeScript que detengan el build
   typescript: {
-    // evitar que TS bloquee el build
     ignoreBuildErrors: true,
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
