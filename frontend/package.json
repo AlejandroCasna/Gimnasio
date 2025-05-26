@@ -5,8 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "export": "next export",
-    "vercel-build": "npm run build && npm run export",
+    "vercel-build": "npm run build",
     "start": "next start",
     "lint": "next lint"
   },
