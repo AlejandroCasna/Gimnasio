@@ -9,7 +9,7 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',                   // sin barra aquí
-        destination: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/:path*`,  // ni aquí
+        destination: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/:path*/`,  // ni aquí
       },
     ]
   },
