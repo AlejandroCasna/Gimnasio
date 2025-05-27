@@ -34,6 +34,7 @@ export default function LoginPage() {
 
       // 3) Ya con la cabecera puesta, puedes llamar a /me/ sin 403:
       const me = await api.get<User>('me/')
+      console.log('[login] perfil:', me.data)
       console.log('Perfil cargado:', me.data)
 
       // 4) Rediriges al dashboard:

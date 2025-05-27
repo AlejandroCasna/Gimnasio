@@ -1,6 +1,8 @@
 // frontend/src/lib/api.ts
 import axios from 'axios'
 
+
+
 // Creamos la instancia apuntando siempre a /api/
 // gracias al rewrite en next.config.js, esto irá a tu backend real.
 export const api = axios.create({
@@ -10,7 +12,8 @@ export const api = axios.create({
     'Content-Type': 'application/json',
   },
 })
-
+// 👉 Ver si esto se carga cuando importas `api`
+console.log('[api] baseURL:', api.defaults.baseURL)
 
 // Inyectar el access token en cada petición
 api.interceptors.request.use(config => {
