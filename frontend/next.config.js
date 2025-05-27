@@ -3,14 +3,13 @@ const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
 
-  // fuerza que Next retenga la barra final
   trailingSlash: true,
 
   async rewrites() {
     return [
       {
-        source: '/api/:path*/',
-        destination: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/:path*/`,
+        source: '/api/:path*',                   // sin barra aquí
+        destination: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/:path*`,  // ni aquí
       },
     ]
   },

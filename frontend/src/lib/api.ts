@@ -5,7 +5,7 @@ import axios from 'axios'
 // gracias al rewrite en next.config.js, esto irá a tu backend real.
 export const api = axios.create({
   baseURL: '/api/',
-  withCredentials: false,
+  withCredentials: true,
 })
 
 // Inyectar el access token en cada petición
@@ -29,8 +29,8 @@ api.interceptors.response.use(
         const { data } = await axios.post(
           '/api/token/refresh',
           { refresh: localStorage.getItem('refreshToken') },
-          { headers: { 'Content-Type': 'application/json' } }
-        )
+                 )
+                 
         localStorage.setItem('accessToken', data.access)
         api.defaults.headers.Authorization = `Bearer ${data.access}`
         originalRequest.headers.Authorization = `Bearer ${data.access}`
