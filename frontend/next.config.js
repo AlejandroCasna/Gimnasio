@@ -6,10 +6,15 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  env: {
-    NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL,
+  // NO output nor trailingSlash aquí
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/:path*`,
+      },
+    ]
   },
-  // NO output: 'export' ni trailingSlash
-};
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig
