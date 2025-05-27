@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { api } from '@/lib/api'
 import type { Routine } from '@/lib/types'
-import { Button } from '@/components/ui/button'
+
 
 export default function ClientRoutine() {
   const [routine, setRoutine] = useState<Routine|null>(null)

@@ -3,7 +3,7 @@
 
 import { Client } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import ClientProfileForm from '@/components/ClientProfileForm';
+
 
 export default function FichaCliente({
   cliente,
