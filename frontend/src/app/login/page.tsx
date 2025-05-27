@@ -1,12 +1,14 @@
+// frontend/src/app/login/page.tsx
 'use client'
 
 import { useState } from 'react'
-import { useAuth } from '@/context/AuthContext'    // importamos el hook
+import { useRouter } from 'next/navigation'
+import { api } from '@/lib/api'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
 export default function LoginPage() {
-  const { login } = useAuth()                     // obtenemos login del contexto
+  const router = useRouter()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -16,12 +18,26 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      // Llamamos al login del contexto, que internamente:
-      // • Hace POST /token/
-// • Guarda tokens en localStorage
-// • Inyecta el header Authorization en la instancia api
-// • Carga el perfil y redirige a /dashboard
-      await login(username, password)
+      // 1) Llamas al endpoint token/ con barra final:
+      const { data } = await api.post<{ access: string; refresh: string }>(
+        'token/',
+        { username, password }
+      )
+
+      // 2) Guardas tokens:
+      localStorage.setItem('accessToken', data.access)
+      localStorage.setItem('refreshToken', data.refresh)
+
+      // ←----- AQUÍ: inyectas correctamente la cabecera para todas las peticiones:
+      api.defaults.headers.common['Authorization'] = `Bearer ${data.access}`
+
+      // 3) Ya con la cabecera puesta, puedes llamar a /me/ sin 403:
+      const me = await api.get('/me/')
+      console.log('Perfil cargado:', me.data)
+
+      // 4) Rediriges al dashboard:
+      router.push('/dashboard/trainer')
+
     } catch (err: any) {
       console.error('Login error:', err)
       setError(err.response?.data?.detail || 'Usuario o contraseña incorrectos')
@@ -35,11 +51,7 @@ export default function LoginPage() {
         className="bg-zinc-900 p-8 rounded-lg space-y-4 w-full max-w-sm"
       >
         <h1 className="text-2xl font-bold text-white text-center">Entrenar</h1>
-
-        {error && (
-          <p className="text-red-500 text-center">{error}</p>
-        )}
-
+        {error && <p className="text-red-500 text-center">{error}</p>}
         <Input
           placeholder="Usuario"
           value={username}
@@ -53,7 +65,6 @@ export default function LoginPage() {
           onChange={e => setPassword(e.target.value)}
           className="bg-zinc-800 text-white"
         />
-
         <Button type="submit" className="w-full bg-red-600 hover:bg-red-700">
           Iniciar sesión
         </Button>
