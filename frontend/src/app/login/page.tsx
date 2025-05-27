@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { api } from '@/lib/api'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { User } from '@/context/AuthContext'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -32,7 +33,7 @@ export default function LoginPage() {
       api.defaults.headers.common['Authorization'] = `Bearer ${data.access}`
 
       // 3) Ya con la cabecera puesta, puedes llamar a /me/ sin 403:
-      const me = await api.get('me/')
+      const me = await api.get<User>('me/')
       console.log('Perfil cargado:', me.data)
 
       // 4) Rediriges al dashboard:
