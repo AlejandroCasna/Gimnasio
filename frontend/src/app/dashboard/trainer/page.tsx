@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/context/AuthContext'
 import type { Client } from '@/lib/types'
 import { api } from '@/lib/api'
 import RunningManager from '@/components/trainer/RunningManager'

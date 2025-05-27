@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/context/AuthContext'
 import { api } from '@/lib/api'
 import type { ChatThread, Trainer, Client } from '@/lib/types'
 
