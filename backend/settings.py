@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 import environ
-
+from corsheaders.defaults import default_headers
 # ─────────────────────────────────────────────────────────────────────────────
 # 1. CARGA DE .env
 # ─────────────────────────────────────────────────────────────────────────────
@@ -164,4 +164,4 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
     "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
 ]
-CORS_ALLOW_HEADERS = list(default_headers) + ['authorization']
+CORS_ALLOW_HEADERS = list(default_headers) + ['Authorization']
