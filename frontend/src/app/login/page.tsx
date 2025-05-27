@@ -1,13 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { api } from '@/lib/api'           // tu instancia
+import { useAuth } from '@/context/AuthContext'    // importamos el hook
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
 export default function LoginPage() {
-  const router = useRouter()
+  const { login } = useAuth()                     // obtenemos login del contexto
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -17,22 +16,12 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      // 1) LOGIN con tu instancia api
-      const { data } = await api.post<{ access: string; refresh: string }>(
-        'token',                           // <- relativa, tu rewrite se encarga
-        { username, password }
-      )
-
-      // 2) GUARDA tokens en localStorage
-      localStorage.setItem('accessToken', data.access)
-      localStorage.setItem('refreshToken', data.refresh)
-
-      // 3) ACTUALIZA el header por defecto de la instancia
-      api.defaults.headers.Authorization = `Bearer ${data.access}`
-
-      // 4) REDIRIGE
-      router.push('/dashboard/trainer')
-
+      // Llamamos al login del contexto, que internamente:
+      // • Hace POST /token/
+// • Guarda tokens en localStorage
+// • Inyecta el header Authorization en la instancia api
+// • Carga el perfil y redirige a /dashboard
+      await login(username, password)
     } catch (err: any) {
       console.error('Login error:', err)
       setError(err.response?.data?.detail || 'Usuario o contraseña incorrectos')
@@ -48,9 +37,7 @@ export default function LoginPage() {
         <h1 className="text-2xl font-bold text-white text-center">Entrenar</h1>
 
         {error && (
-          <p className="text-red-500 text-center">
-            {error}
-          </p>
+          <p className="text-red-500 text-center">{error}</p>
         )}
 
         <Input
