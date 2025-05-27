@@ -1,14 +1,10 @@
-// src/app/login/page.tsx
 'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-
+import { api } from '@/lib/api'       // tu cliente axios
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-
-console.log('BACKEND_URL en cliente:', process.env.NEXT_PUBLIC_BACKEND_URL)
-
 
 export default function LoginPage() {
   const router = useRouter()
@@ -20,39 +16,24 @@ export default function LoginPage() {
     e.preventDefault()
     setError(null)
 
-    const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || ''
-   console.log('🚀 LOGIN va a llamar a:', `${BACKEND}/api/token/`)
-    
-    
     try {
-      // 1) Pido access + refresh
-      const res = await fetch(`${BACKEND}/api/token/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      })
+      // 1) Pedimos access+refresh TOKEN usando la instancia api
+      const { data } = await api.post<{ access: string; refresh: string }>(
+        '/token/',
+        { username, password },
+        { headers: { 'Content-Type': 'application/json' } }
+      )
 
-      if (!res.ok) {
-        // Si la credencial es incorrecta, saco el detalle (si viene) o mensaje genérico
-        const errData = await res.json().catch(() => null)
-        throw new Error(errData?.detail || 'Usuario o contraseña incorrectos')
-      }
+      // 2) Guardamos tokens y ponemos default header
+      localStorage.setItem('accessToken', data.access)
+      localStorage.setItem('refreshToken', data.refresh)
+      api.defaults.headers.Authorization = `Bearer ${data.access}`
 
-      const data = await res.json() as { access: string, refresh: string }
-
-      // 2) Guardo en localStorage
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('accessToken', data.access)
-        localStorage.setItem('refreshToken', data.refresh)
-        // guardamos usuario para mostrarlo en el Header
-        localStorage.setItem('user', username)
-      }
-
-      // 3) Redirijo al dashboard
+      // 3) Redirigimos
       router.push('/dashboard/trainer')
     } catch (err: any) {
       console.error('Login error:', err)
-      setError(err.message)
+      setError(err.response?.data?.detail || 'Usuario o contraseña incorrectos')
     }
   }
 
