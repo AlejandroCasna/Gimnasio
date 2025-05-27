@@ -27,7 +27,7 @@ api.interceptors.response.use(
       try {
         // Ruta relativa también para el refresh
         const { data } = await axios.post(
-          '/api/token/refresh/',
+          '/api/token/refresh',
           { refresh: localStorage.getItem('refreshToken') },
           { headers: { 'Content-Type': 'application/json' } }
         )

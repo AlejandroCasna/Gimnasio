@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { api } from '@/lib/api'       // tu cliente axios
+import { api } from '@/lib/api'           // tu instancia
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
@@ -17,20 +17,22 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      // 1) Pedimos access+refresh TOKEN usando la instancia api
+      // 1) LOGIN con tu instancia api
       const { data } = await api.post<{ access: string; refresh: string }>(
-        '/token/',
-        { username, password },
-        { headers: { 'Content-Type': 'application/json' } }
+        'token',                           // <- relativa, tu rewrite se encarga
+        { username, password }
       )
 
-      // 2) Guardamos tokens y ponemos default header
+      // 2) GUARDA tokens en localStorage
       localStorage.setItem('accessToken', data.access)
       localStorage.setItem('refreshToken', data.refresh)
+
+      // 3) ACTUALIZA el header por defecto de la instancia
       api.defaults.headers.Authorization = `Bearer ${data.access}`
 
-      // 3) Redirigimos
+      // 4) REDIRIGE
       router.push('/dashboard/trainer')
+
     } catch (err: any) {
       console.error('Login error:', err)
       setError(err.response?.data?.detail || 'Usuario o contraseña incorrectos')
