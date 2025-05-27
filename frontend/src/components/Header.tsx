@@ -5,7 +5,7 @@ import { useTheme }  from 'next-themes'
 import { useRouter } from 'next/navigation'
 import Link          from 'next/link'
 import { Dumbbell, Instagram, MessageSquare } from 'lucide-react'
-import { useAuth }   from '@/hooks/useAuth'
+import { useAuth } from '@/context/AuthContext'
 import { useState, useEffect } from 'react'
 
 export default function Header() {

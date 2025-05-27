@@ -3,7 +3,7 @@
 
 import { ReactNode } from 'react'
 import { ThemeProvider } from 'next-themes'
-import { AuthProvider, useAuth } from '@/context/AuthContext'
+import { AuthProvider } from '@/context/AuthContext'
 
 export default function Providers({ children }: { children: ReactNode }) {
   return (
