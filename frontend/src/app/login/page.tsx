@@ -36,8 +36,7 @@ export default function LoginPage() {
       // 4) Redirigimos según rol
       startTransition(() => {
         if (me.data.groups.includes('Trainer')) {
-          router.replace('/dashboard/trainer')
-          router.refresh()
+          window.location.href = '/dashboard/trainer'
         } else {
           router.replace('/dashboard/client')
         }
