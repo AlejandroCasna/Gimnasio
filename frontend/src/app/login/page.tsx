@@ -1,15 +1,15 @@
 // frontend/src/app/login/page.tsx
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { api } from '@/lib/api'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { User } from '@/context/AuthContext'
 
 export default function LoginPage() {
   const router = useRouter()
+  const [isPending, startTransition] = useTransition()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -19,27 +19,24 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      // 1) Llamas al endpoint token/ con barra final:
+      // 1) Pedimos tokens
       const { data } = await api.post<{ access: string; refresh: string }>(
         'token/',
         { username, password }
       )
 
-      // 2) Guardas tokens:
+      // 2) Almacenamos
       localStorage.setItem('accessToken', data.access)
       localStorage.setItem('refreshToken', data.refresh)
-
-      // ←----- AQUÍ: inyectas correctamente la cabecera para todas las peticiones:
       api.defaults.headers.common['Authorization'] = `Bearer ${data.access}`
 
-      // 3) Ya con la cabecera puesta, puedes llamar a /me/ sin 403:
-      const me = await api.get<User>('me/')
-      console.log('[login] perfil:', me.data)
-      console.log('Perfil cargado:', me.data)
+      // 3) Esperamos a que /me/ nos confirme que todo está OK
+      await api.get('/me/')
 
-      // 4) Rediriges al dashboard:
-      router.push('/dashboard/trainer')
-
+      // 4) Ahora navengamos con replace para que no vuelva atrás al login
+      startTransition(() => {
+        router.replace('/dashboard/trainer')
+      })
     } catch (err: any) {
       console.error('Login error:', err)
       setError(err.response?.data?.detail || 'Usuario o contraseña incorrectos')
@@ -67,8 +64,12 @@ export default function LoginPage() {
           onChange={e => setPassword(e.target.value)}
           className="bg-zinc-800 text-white"
         />
-        <Button type="submit" className="w-full bg-red-600 hover:bg-red-700">
-          Iniciar sesión
+        <Button 
+          type="submit" 
+          className="w-full bg-red-600 hover:bg-red-700"
+          disabled={isPending}
+        >
+          {isPending ? 'Cargando…' : 'Iniciar sesión'}
         </Button>
       </form>
     </div>
