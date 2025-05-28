@@ -68,7 +68,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     api.defaults.headers.common['Authorization'] = `Bearer ${access}`
     const me = await api.get<User>('me/')
     setUser(me.data)
-    router.push('/dashboard')
+    
+    if (me.data.groups.includes('Trainer')) {
+      router.push('/dashboard/trainer')} 
+    else {
+      router.push('/dashboard/client')
+}
   }
 
   // 4) Función de logout

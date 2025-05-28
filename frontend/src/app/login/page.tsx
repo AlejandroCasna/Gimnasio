@@ -31,17 +31,22 @@ export default function LoginPage() {
       api.defaults.headers.common['Authorization'] = `Bearer ${data.access}`
 
       // 3) Esperamos a que /me/ nos confirme que todo está OK
-      await api.get('/me/')
+      const me = await api.get<{ groups: string[] }>('/me/')
 
-      // 4) Ahora navengamos con replace para que no vuelva atrás al login
+      // 4) Redirigimos según rol
       startTransition(() => {
-        router.replace('/dashboard/trainer')
+        if (me.data.groups.includes('Trainer')) {
+          router.replace('/dashboard/trainer')
+        } else {
+          router.replace('/dashboard/client')
+        }
       })
     } catch (err: any) {
       console.error('Login error:', err)
       setError(err.response?.data?.detail || 'Usuario o contraseña incorrectos')
     }
   }
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black">
