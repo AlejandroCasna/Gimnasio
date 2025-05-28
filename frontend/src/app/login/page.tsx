@@ -37,6 +37,7 @@ export default function LoginPage() {
       startTransition(() => {
         if (me.data.groups.includes('Trainer')) {
           router.replace('/dashboard/trainer')
+          router.refresh()
         } else {
           router.replace('/dashboard/client')
         }
