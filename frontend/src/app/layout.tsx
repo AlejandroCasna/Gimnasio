@@ -10,12 +10,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es">
       <head>
         <script src="https://sdk.mercadopago.com/js/v2" async></script>
+        <link rel="icon" href="/logo.png" />
       </head>
       <body className="…">
         <div className="…bg-image…"/>
         <Providers>
           <Header />
-          <main className="mx-auto max-w-5xl p-4">
+          <main className="container p-4">
             {children}
           </main>
         </Providers>

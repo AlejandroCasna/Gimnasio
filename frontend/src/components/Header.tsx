@@ -4,7 +4,7 @@
 import { useTheme }  from 'next-themes'
 import { useRouter } from 'next/navigation'
 import Link          from 'next/link'
-import { Dumbbell, Instagram, MessageSquare } from 'lucide-react'
+import {Instagram, MessageSquare } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useState, useEffect } from 'react'
 
@@ -35,7 +35,12 @@ export default function Header() {
 
         {/* --- IZQUIERDA: logo + RRSS --- */}
         <div className="flex items-center gap-4">
-          <Dumbbell className="h-6 w-6 text-red-600" />
+          <img
+            src="/logo.png"
+            alt="El Bajo Entrena"
+            
+            className="h-6 w-6"
+          />
           <Link href="/" className="font-semibold tracking-wide text-red-600">
             El Bajo Entrena
           </Link>

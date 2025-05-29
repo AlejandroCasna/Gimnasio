@@ -127,3 +127,26 @@
 [data-variant='secondary'] {
   @apply bg-zinc-800 text-zinc-100 hover:bg-red-600 transition-colors;
 }
+
+@media screen and (min-width: 1024px) {
+  body {
+    font-size: 18px;
+    padding: 2rem;
+  }
+
+  /* Contenedor principal con sidebar + contenido */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .sidebar {
+    width: 25%;
+  }
+
+  .main-content {
+    width: 75%;
+  }
+}
