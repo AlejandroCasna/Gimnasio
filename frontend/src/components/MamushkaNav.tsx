@@ -11,7 +11,7 @@ interface Node {
   label:    ReactNode
   children?: Node[]
   qrKey?:   string
-  route?:   string
+  isProfesTrigger?: boolean
 }
 
 // — Tu árbol de opciones
@@ -90,7 +90,7 @@ const tree: Node[] = [
   },
   {
     label: <span className="font-lato">Entrenamiento personalizado</span>,
-    route: '/profes',
+    isProfesTrigger: true
       },
   {
     label: <span className="font-lato">Entrenamiento a distancia</span>,
@@ -118,12 +118,14 @@ export default function MamushkaNav() {
   const router = useRouter()
   const [stack,     setStack] = useState<Node[][]>([tree])
   const [selection, setSel]   = useState<{ id: string; amount: number } | null>(null)
+  const [showProfes, setShowProfes] = useState(false)
   const current = stack[stack.length - 1]
 
   const push = (node: Node) => {
     // 1) Si el nodo tiene ruta, navega ahí
-    if (node.route) {
-      return router.push(node.route)
+    if (node.isProfesTrigger) {
+      setShowProfes(true)
+    return
     }
 
     // 2) Si es un qrKey (Pago), abre MercadoPago
