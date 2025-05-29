@@ -15,14 +15,14 @@ interface Node {
 // — Tu árbol de opciones
 const tree: Node[] = [
   {
-    label: 'Entrenamiento presencial Grupal',
+    label: <span className="font-lato">Entrenamiento presencial Grupal</span>,
     children: [
       {
         label: (
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between font-lato">
             <span>Punta chica</span>
             <a
-              href="https://www.google.com/maps?q=EL+BAJO+ENTRENA+punta+chica,+Escalada+2800,+B1646+San+Fernando,+Provincia+de+Buenos+Aires&ftid=0x95bcafefb1fa4c31:0xea59586d8e3760fb&entry=gps&lucs=,94224825,94227247,94227248,94231188,47071704,47069508,94218641,94203019,47084304,94208458,94208447&g_ep=CAISEjI1LjE2LjEuNzQ3NTI2NjMwMBgAINeCAypjLDk0MjI0ODI1LDk0MjI3MjQ3LDk0MjI3MjQ4LDk0MjMxMTg4LDQ3MDcxNzA0LDQ3MDY5NTA4LDk0MjE4NjQxLDk0MjAzMDE5LDQ3MDg0MzA0LDk0MjA4NDU4LDk0MjA4NDQ3QgJBUg%3D%3D&skid=bc6c8387-5c6a-49ce-8fbc-2327b8aad238&g_st=com.google.maps.preview.copy"
+              href="https://www.google.com/maps?q=EL+BAJO+ENTRENA+punta+chica"
               target="_blank"
               rel="noopener noreferrer"
               onClick={e => e.stopPropagation()}
@@ -33,44 +33,44 @@ const tree: Node[] = [
           </div>
         ) as ReactNode,
         children: [
-          { label: '1 vez a la semana – $25.000', qrKey: '1_semana' },
-          { label: '2 veces a la semana – $32.000', qrKey: '2_semanas' },
-          { label: '3 veces a la semana – $35.000', qrKey: '3_semanas' },
-          { label: '4 veces a la semana – $38.000', qrKey: '4_semanas' },
-          { label: 'Libre – $42.000',           qrKey: 'libre'     },
-        ],
+          { label: '1 vez a la semana', children: [{ label: '$25.000', qrKey: '1_semana' }] },
+          { label: '2 veces a la semana', children: [{ label: '$32.000', qrKey: '2_semanas' }] },
+          { label: '3 veces a la semana', children: [{ label: '$35.000', qrKey: '3_semanas' }] },
+          { label: '4 veces a la semana', children: [{ label: '$38.000', qrKey: '4_semanas' }] },
+          { label: 'Libre', children: [{ label: '$42.000', qrKey: 'libre' }] },
+        ]
       },
       {
-        label: 'Local 2',
+        label: <span className="font-lato">Local 2</span>,
         children: [
-          { label: '1 vez a la semana – $25.000', qrKey: '1_semana' },
-          { label: '2 veces a la semana – $32.000', qrKey: '2_semanas' },
-          { label: '3 veces a la semana – $35.000', qrKey: '3_semanas' },
-          { label: '4 veces a la semana – $38.000', qrKey: '4_semanas' },
-          { label: 'Libre – $42.000',           qrKey: 'libre'     },
-        ],
+          { label: '1 vez a la semana', children: [{ label: '$25.000', qrKey: '1_semana' }] },
+          { label: '2 veces a la semana', children: [{ label: '$32.000', qrKey: '2_semanas' }] },
+          { label: '3 veces a la semana', children: [{ label: '$35.000', qrKey: '3_semanas' }] },
+          { label: '4 veces a la semana', children: [{ label: '$38.000', qrKey: '4_semanas' }] },
+          { label: 'Libre', children: [{ label: '$42.000', qrKey: 'libre' }] },
+        ]
       },
       {
-        label: 'Local 3',
+        label: <span className="font-lato">Local 3</span>,
         children: [
-          { label: '1 vez a la semana – $25.000', qrKey: '1_semana' },
-          { label: '2 veces a la semana – $32.000', qrKey: '2_semanas' },
-          { label: '3 veces a la semana – $35.000', qrKey: '3_semanas' },
-          { label: '4 veces a la semana – $38.000', qrKey: '4_semanas' },
-          { label: 'Libre – $42.000',           qrKey: 'libre'     },
-        ],
+          { label: '1 vez a la semana', children: [{ label: '$25.000', qrKey: '1_semana' }] },
+          { label: '2 veces a la semana', children: [{ label: '$32.000', qrKey: '2_semanas' }] },
+          { label: '3 veces a la semana', children: [{ label: '$35.000', qrKey: '3_semanas' }] },
+          { label: '4 veces a la semana', children: [{ label: '$38.000', qrKey: '4_semanas' }] },
+          { label: 'Libre', children: [{ label: '$42.000', qrKey: 'libre' }] },
+        ]
       },
-    ],
+    ]
   },
   {
-    label: 'Entrenamiento personalizado',
+    label: <span className="font-lato">Entrenamiento personalizado</span>,
     children: [
       {
         label: (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 font-lato">
             <span>Punta chica</span>
             <a
-              href="https://www.google.com/maps?q=EL+BAJO+ENTRENA+punta+chica,+Escalada+2800,+B1646+San+Fernando,+Provincia+de+Buenos+Aires&ftid=0x95bcafefb1fa4c31:0xea59586d8e3760fb&entry=gps&lucs=,94224825,94227247,94227248,94231188,47071704,47069508,94218641,94203019,47084304,94208458,94208447&g_ep=CAISEjI1LjE2LjEuNzQ3NTI2NjMwMBgAINeCAypjLDk0MjI0ODI1LDk0MjI3MjQ3LDk0MjI3MjQ4LDk0MjMxMTg4LDQ3MDcxNzA0LDQ3MDY5NTA4LDk0MjE4NjQxLDk0MjAzMDE5LDQ3MDg0MzA0LDk0MjA4NDU4LDk0MjA4NDQ3QgJBUg%3D%3D&skid=bc6c8387-5c6a-49ce-8fbc-2327b8aad238&g_st=com.google.maps.preview.copy"
+              href="https://www.google.com/maps?q=EL+BAJO+ENTRENA+punta+chica"
               target="_blank"
               rel="noopener noreferrer"
               onClick={e => e.stopPropagation()}
@@ -80,41 +80,48 @@ const tree: Node[] = [
             </a>
           </div>
         ) as ReactNode,
-      },
-      { label: 'Local 2' },
-      { label: 'Local 3' },
-    ],
+        children: [
+          { label: '1 vez a la semana', children: [{ label: '$25.000', qrKey: '1_semana' }] },
+          { label: '2 veces a la semana', children: [{ label: '$32.000', qrKey: '2_semanas' }] },
+          { label: '3 veces a la semana', children: [{ label: '$35.000', qrKey: '3_semanas' }] },
+          { label: '4 veces a la semana', children: [{ label: '$38.000', qrKey: '4_semanas' }] },
+          { label: 'Libre', children: [{ label: '$42.000', qrKey: 'libre' }] },
+        ]
+      }
+    ]
   },
   {
-    label: 'Entrenamiento a distancia',
+    label: <span className="font-lato">Entrenamiento a distancia</span>,
     children: [
-      { label: 'Running' },
-      { label: 'Fuerza en Gimnasio' },
-      { label: 'Híbrido' },
-    ],
-  },
+      { label: 'Running', qrKey: 'running' },
+      { label: 'Fuerza en Gimnasio', qrKey: 'gimnasio' },
+      { label: 'Híbrido', qrKey: 'hibrido' },
+    ]
+  }
 ]
 
 // — Mapa de precios
 const PRICE_MAP: Record<string, number> = {
-  '1_semana':  25000,
-  '2_semanas': 32000,
-  '3_semanas': 35000,
-  '4_semanas': 38000,
-  'libre':     42000,
+  '1_semana':   25000,
+  '2_semanas':  32000,
+  '3_semanas':  35000,
+  '4_semanas':  38000,
+  'libre':      42000,
+  'running':    20000, // ejemplo
+  'gimnasio':   30000, // ejemplo
+  'hibrido':    27000, // ejemplo
 }
 
 export default function MamushkaNav() {
-  // 1) inicializamos stack ya con [tree]
   const [stack,     setStack] = useState<Node[][]>([tree])
   const [selection, setSel]   = useState<{ id: string; amount: number } | null>(null)
 
-  const current = stack[stack.length - 1]  // ¡nunca será undefined!
+  const current = stack[stack.length - 1]
 
   const push = (node: Node) => {
     if (node.qrKey) {
       const amount = PRICE_MAP[node.qrKey]
-      if (!amount) {
+      if (amount == null) {
         console.error('Falta precio para', node.qrKey)
         return
       }
@@ -129,7 +136,6 @@ export default function MamushkaNav() {
     setStack(s => (s.length > 1 ? s.slice(0, -1) : s))
   }
 
-  // 2) Si ya elegí plan, muestro el botón de pago
   if (selection) {
     return (
       <div className="mb-4">
@@ -144,7 +150,6 @@ export default function MamushkaNav() {
     )
   }
 
-  // 3) Menú normal
   return (
     <>
       {stack.length > 1 && (
