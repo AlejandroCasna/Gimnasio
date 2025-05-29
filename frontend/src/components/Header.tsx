@@ -39,7 +39,7 @@ export default function Header() {
             src="/logo.png"
             alt="El Bajo Entrena"
             
-            className="h-6 w-6"
+            className="h-8 w-8 sm:h-10 sm:w-10"
           />
           <Link href="/" className="font-semibold tracking-wide text-red-600">
             El Bajo Entrena

@@ -63,7 +63,7 @@ const tree: Node[] = [
     ],
   },
   {
-    label: 'Entrenamiento personalizadas',
+    label: 'Entrenamiento personalizado',
     children: [
       {
         label: (

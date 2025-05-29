@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="…bg-image…"/>
         <Providers>
           <Header />
-          <main className="container p-4">
+          <main className="container px-4 py-8">
             {children}
           </main>
         </Providers>
