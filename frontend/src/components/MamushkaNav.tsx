@@ -160,9 +160,9 @@ export default function MamushkaNav() {
   }
 
   return (
-    <div className="flex">
+    <div className="flex w-full">
       {/* — MENÚ */}
-      <div className="w-full max-w-sm">
+      <div className="flex-1">
         {stack.length > 1 && (
           <Button variant="ghost" size="icon" onClick={pop} className="mb-2">
             <ChevronLeft />
