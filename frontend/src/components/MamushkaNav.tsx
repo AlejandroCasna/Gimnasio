@@ -7,12 +7,12 @@ import { ChevronLeft, MapPin,X } from 'lucide-react'
 import PaymentButton from './PaymentButton'
 import { profes, Profe } from '@/data/profes'
 import { ProfeCard } from './ProfeCard'
+import React from 'react'
 
 interface Node {
   label:    ReactNode
   children?: Node[]
   qrKey?:   string
-  isProfesTrigger?: boolean
 }
 
 // — Tu árbol de opciones
@@ -91,57 +91,68 @@ const tree: Node[] = [
   },
   {
     label: <span className="font-lato">Entrenamiento personalizado</span>,
-    isProfesTrigger: true
-      },
-  {
-    label: <span className="font-lato">Entrenamiento a distancia</span>,
-    children: [
-      { label: 'Running', qrKey: 'running' },
-      { label: 'Fuerza en Gimnasio', qrKey: 'gimnasio' },
-      { label: 'Híbrido', qrKey: 'hibrido' },
-    ]
-  }
-]
+    children: profes.map((prof: Profe) => ({
+      // cada profe se renderiza con tu ProfeCard
+      label: (
+        <ProfeCard
+          key={prof.name}
+          {...prof}
+          profe={prof}
+        />
+      ),
+      // sin qrKey ni route: no hace nada al push
+    })),
+  },
+   {
+     label: <span className="font-lato">Entrenamiento a distancia</span>,
+     children: [
+       { label: 'Running', qrKey: 'running' },
+       { label: 'Fuerza en Gimnasio', qrKey: 'gimnasio' },
+       { label: 'Híbrido', qrKey: 'hibrido' },
+     ]
+   }
+ ]
 
 // — Mapa de precios
 const PRICE_MAP: Record<string, number> = {
-  '1_semana': 25000,
-  /* … */
-  'running': 20000,
-  'gimnasio': 30000,
-  'hibrido': 27000,
+  '1_semana':  25000,
+  '2_semanas': 32000,
+  '3_semanas': 35000,
+  '4_semanas': 38000,
+  'libre':     42000,
+  running:     20000,
+  gimnasio:    30000,
+  hibrido:     27000,
 }
 
 export default function MamushkaNav() {
-  const [stack, setStack] = useState<Node[][]>([tree])
-  const [selection, setSel] = useState<{ id: string, amount: number } | null>(null)
-  const [showProfes, setShowProfes] = useState(false)
+  const [stack,     setStack]   = useState<Node[][]>([tree])
+  const [selection, setSelection] = useState<{ id: string; amount: number } | null>(null)
+
   const current = stack[stack.length - 1]
 
   function push(node: Node) {
-    if (node.isProfesTrigger) {
-      setShowProfes(true)
-      return
-    }
+    // 1) Pago:
     if (node.qrKey) {
-      const amount = PRICE_MAP[node.qrKey]
-      if (amount == null) return console.error('Falta precio para', node.qrKey)
-      return setSel({ id: node.qrKey, amount })
+      const amount = PRICE_MAP[node.qrKey]!
+      return setSelection({ id: node.qrKey, amount })
     }
+    // 2) Nuevo nivel:
     if (node.children) {
-      setStack(s => [...s, node.children!])
+      setStack(prev => [...prev, node.children!])
     }
   }
 
   function pop() {
-    setStack(s => (s.length > 1 ? s.slice(0, -1) : s))
+    setStack(prev => (prev.length > 1 ? prev.slice(0, -1) : prev))
   }
 
+  // Botón MercadoPago
   if (selection) {
     return (
       <div className="mb-4">
         <PaymentButton productId={selection.id} amount={selection.amount} />
-        <Button variant="ghost" className="mt-2" onClick={() => setSel(null)}>
+        <Button variant="ghost" className="mt-2" onClick={() => setSelection(null)}>
           ← Volver
         </Button>
       </div>
@@ -150,38 +161,27 @@ export default function MamushkaNav() {
 
   return (
     <div className="flex">
-      {/* — Menú */}
+      {/* — MENÚ */}
       <div className="w-full max-w-sm">
         {stack.length > 1 && (
           <Button variant="ghost" size="icon" onClick={pop} className="mb-2">
             <ChevronLeft />
           </Button>
         )}
-        <div className="grid gap-2">
-          {current.map((node, i) => (
-            <Button key={i} onClick={() => push(node)} className="w-full">
-              {node.label}
-            </Button>
-          ))}
+        <div className="grid grid-cols-1 gap-2 mb-4">
+          {current.map((node, i) => {
+            // Si el label es tu tarjeta de profe, la sacamos del <Button>
+            if (React.isValidElement(node.label) && node.label.type === ProfeCard) {
+              return <div key={i}>{node.label}</div>
+            }
+            // En otro caso, botón normal
+            return (
+              <Button key={i} onClick={() => push(node)} className="w-full">
+                {node.label}
+              </Button>
+            )
+          })}
         </div>
       </div>
-
-      {/* — Panel lateral “Profes” */}
-      {showProfes && (
-        <div className="fixed top-0 right-0 w-80 h-full bg-white shadow-xl flex flex-col">
-          <div className="flex items-center justify-between p-4 border-b">
-            <h2 className="text-xl font-bold">Nuestros Profes</h2>
-            <Button size="icon" onClick={() => setShowProfes(false)}>
-              <X />
-            </Button>
-          </div>
-          <div className="overflow-auto p-4 space-y-4">
-            {profes.map((prof: Profe) => (
-       <ProfeCard key={prof.name} profe={prof} />
-     ))}
-          </div>
-        </div>
-      )}
     </div>
-  )
-}
+  )}
