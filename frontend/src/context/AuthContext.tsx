@@ -27,7 +27,8 @@ const AuthCtx = createContext<AuthContextType>({
   logout: () => {},
 })
 
-const publicPaths = ['/', '/login', '/register', '/about']
+
+const publicPaths = ['/', '/login', '/register', '/about', '/profes']
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser]       = useState<User | null>(null)
