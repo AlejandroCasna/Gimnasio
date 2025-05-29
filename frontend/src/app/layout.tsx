@@ -12,11 +12,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script src="https://sdk.mercadopago.com/js/v2" async></script>
         <link rel="icon" href="/logo.png" />
       </head>
-      <body className="…">
-        <div className="…bg-image…"/>
+      <body className="bg-light-100 text-foreground">
         <Providers>
           <Header />
-          <main className="container px-4 py-8">
+          <main className="w-full px-4 py-8 lg:px-16">
             {children}
           </main>
         </Providers>

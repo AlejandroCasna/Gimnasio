@@ -12,30 +12,25 @@ export default function Dashboard() {
     { src: '/5.png', alt: 'Noticia C' },
   ]
 
-  return (
-    <div className="container">
-      <main className="main-content">
-        {/* Hero sigue aquí */}
-        <Hero />
+return (
+    <>
+      <Hero />
 
-        {/* Planes sigue aquí */}
-        <section className="mx-auto max-w-screen-xl px-4 py-16">
-          <h2 className="text-2xl font-bold mb-6 text-center">
-            Elige tu plan
-          </h2>
-          <MamushkaNav />
-        </section>
+      <section className="mx-auto max-w-screen-xl px-4 py-16">
+        <h2 className="text-2xl font-bold mb-6 text-center">
+          Elige tu plan
+        </h2>
+        <MamushkaNav />
+      </section>
 
-        {/* Carrusel de noticias sigue aquí */}
-        <div className="w-full bg-zinc-900 py-8">
-          <h3 className="text-xl font-semibold text-white mb-4 text-center">
-            Noticias del día
-          </h3>
-          <div className="mx-auto max-w-screen-2xl px-4">
-            <NewsCarousel images={slides} intervalMs={5000} />
-          </div>
+      <div className="w-full bg-zinc-900 py-8">
+        <h3 className="text-xl font-semibold text-white mb-4 text-center">
+          Noticias del día
+        </h3>
+        <div className="mx-auto max-w-screen-2xl px-4">
+          <NewsCarousel images={slides} intervalMs={5000} />
         </div>
-      </main>
-    </div>
+      </div>
+    </>
   )
-}
+ }

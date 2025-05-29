@@ -131,7 +131,8 @@
 @media screen and (min-width: 1024px) {
   body {
     font-size: 18px;
-    padding: 2rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
   }
 
   /* Contenedor principal con sidebar + contenido */
