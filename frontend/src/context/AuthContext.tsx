@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // 2) Protege rutas client-side
   useEffect(() => {
     if (loading) return
-    if (publicPaths.includes(pathname)) return
+    if (publicPaths.includes(pathname) || pathname.startsWith('/profes/')) {return}
     if (!user) router.replace('/login')
   }, [loading, pathname, user, router])
 
