@@ -22,7 +22,7 @@ const tree: Node[] = [
           <div className="flex items-center justify-between font-lato">
             <span>Punta chica</span>
             <a
-              href="https://www.google.com/maps?q=EL+BAJO+ENTRENA+punta+chica"
+              href="https://www.google.com/maps/place/EL+BAJO+ENTRENA+punta+chica/@-34.4447507,-58.5344109,17z/data=!3m1!4b1!4m6!3m5!1s0x95bcafefb1fa4c31:0xea59586d8e3760fb!8m2!3d-34.4447507!4d-58.5344109!16s%2Fg%2F11h0lbdfyl?entry=ttu&g_ep=EgoyMDI1MDUyNi4wIKXMDSoASAFQAw%3D%3D"
               target="_blank"
               rel="noopener noreferrer"
               onClick={e => e.stopPropagation()}
@@ -70,7 +70,7 @@ const tree: Node[] = [
           <div className="flex items-center gap-2 font-lato">
             <span>Punta chica</span>
             <a
-              href="https://www.google.com/maps?q=EL+BAJO+ENTRENA+punta+chica"
+              href="https://www.google.com/maps/place/EL+BAJO+ENTRENA+punta+chica/@-34.4447507,-58.5344109,17z/data=!3m1!4b1!4m6!3m5!1s0x95bcafefb1fa4c31:0xea59586d8e3760fb!8m2!3d-34.4447507!4d-58.5344109!16s%2Fg%2F11h0lbdfyl?entry=ttu&g_ep=EgoyMDI1MDUyNi4wIKXMDSoASAFQAw%3D%3D"
               target="_blank"
               rel="noopener noreferrer"
               onClick={e => e.stopPropagation()}
