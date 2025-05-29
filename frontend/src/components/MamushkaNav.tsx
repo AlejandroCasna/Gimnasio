@@ -3,9 +3,10 @@
 
 import { useState, ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, MapPin } from 'lucide-react'
+import { ChevronLeft, MapPin,X } from 'lucide-react'
 import PaymentButton from './PaymentButton'
-import { useRouter } from 'next/navigation'
+import { profes, Profe } from '@/data/profes'
+import { ProfeCard } from './ProfeCard'
 
 interface Node {
   label:    ReactNode
@@ -104,58 +105,42 @@ const tree: Node[] = [
 
 // — Mapa de precios
 const PRICE_MAP: Record<string, number> = {
-  '1_semana':   25000,
-  '2_semanas':  32000,
-  '3_semanas':  35000,
-  '4_semanas':  38000,
-  'libre':      42000,
-  'running':    20000, // ejemplo
-  'gimnasio':   30000, // ejemplo
-  'hibrido':    27000, // ejemplo
+  '1_semana': 25000,
+  /* … */
+  'running': 20000,
+  'gimnasio': 30000,
+  'hibrido': 27000,
 }
 
 export default function MamushkaNav() {
-  const router = useRouter()
-  const [stack,     setStack] = useState<Node[][]>([tree])
-  const [selection, setSel]   = useState<{ id: string; amount: number } | null>(null)
+  const [stack, setStack] = useState<Node[][]>([tree])
+  const [selection, setSel] = useState<{ id: string, amount: number } | null>(null)
   const [showProfes, setShowProfes] = useState(false)
   const current = stack[stack.length - 1]
 
-  const push = (node: Node) => {
-    // 1) Si el nodo tiene ruta, navega ahí
+  function push(node: Node) {
     if (node.isProfesTrigger) {
       setShowProfes(true)
-    return
+      return
     }
-
-    // 2) Si es un qrKey (Pago), abre MercadoPago
     if (node.qrKey) {
       const amount = PRICE_MAP[node.qrKey]
-      if (amount == null) {
-        console.error('Falta precio para', node.qrKey)
-        return
-      }
+      if (amount == null) return console.error('Falta precio para', node.qrKey)
       return setSel({ id: node.qrKey, amount })
     }
-
-    // 3) Si tiene children, añádelos al stack (no puede ser undefined porque entró al if)
     if (node.children) {
       setStack(s => [...s, node.children!])
     }
   }
 
-  const pop = () => {
+  function pop() {
     setStack(s => (s.length > 1 ? s.slice(0, -1) : s))
   }
 
-  // 4) Si ya elegí un plan con qrKey, muestro botón de MercadoPago
   if (selection) {
     return (
       <div className="mb-4">
-        <PaymentButton
-          productId={selection.id}
-          amount={selection.amount}
-        />
+        <PaymentButton productId={selection.id} amount={selection.amount} />
         <Button variant="ghost" className="mt-2" onClick={() => setSel(null)}>
           ← Volver
         </Button>
@@ -163,21 +148,40 @@ export default function MamushkaNav() {
     )
   }
 
-  // 5) Menú principal
   return (
-    <>
-      {stack.length > 1 && (
-        <Button variant="ghost" size="icon" onClick={pop} className="mb-2">
-          <ChevronLeft />
-        </Button>
-      )}
-      <div className="grid grid-cols-1 gap-2 mb-4">
-        {current.map((node, i) => (
-          <Button key={i} onClick={() => push(node)} className="w-full">
-            {node.label}
+    <div className="flex">
+      {/* — Menú */}
+      <div className="w-full max-w-sm">
+        {stack.length > 1 && (
+          <Button variant="ghost" size="icon" onClick={pop} className="mb-2">
+            <ChevronLeft />
           </Button>
-        ))}
+        )}
+        <div className="grid gap-2">
+          {current.map((node, i) => (
+            <Button key={i} onClick={() => push(node)} className="w-full">
+              {node.label}
+            </Button>
+          ))}
+        </div>
       </div>
-    </>
+
+      {/* — Panel lateral “Profes” */}
+      {showProfes && (
+        <div className="fixed top-0 right-0 w-80 h-full bg-white shadow-xl flex flex-col">
+          <div className="flex items-center justify-between p-4 border-b">
+            <h2 className="text-xl font-bold">Nuestros Profes</h2>
+            <Button size="icon" onClick={() => setShowProfes(false)}>
+              <X />
+            </Button>
+          </div>
+          <div className="overflow-auto p-4 space-y-4">
+            {profes.map((prof: Profe) => (
+       <ProfeCard key={prof.name} profe={prof} />
+     ))}
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
