@@ -23,10 +23,12 @@ import NewsCarousel from '@/components/NewsCarousel'
          <MamushkaNav />
        </section>
 
-      <div className="w-full bg-zinc-900 py-8">
-        <h3 className="text-xl font-semibold text-white mb-4 text-center">
-          Noticias del día
-        </h3>
+      <section className="py-8">
+        <div className="bg-zinc-900 py-4">
+          <h3 className="text-xl font-semibold text-white mb-0 text-center">
+            Noticias del día
+          </h3>
+        </div>
         
           <div className="mx-auto max-w-screen-lg px-4">
           <NewsCarousel
@@ -36,7 +38,8 @@ import NewsCarousel from '@/components/NewsCarousel'
            className="mx-auto h-56" 
           />
         </div>
-      </div>
+        </section>
+
      </>
    )
  }
