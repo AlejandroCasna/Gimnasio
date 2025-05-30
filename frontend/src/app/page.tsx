@@ -27,11 +27,13 @@ import NewsCarousel from '@/components/NewsCarousel'
         <h3 className="text-xl font-semibold text-white mb-4 text-center">
           Noticias del día
         </h3>
-        <div className="mx-auto max-w-screen-2xl px-4">
+        
+          <div className="mx-auto max-w-screen-lg px-4">
           <NewsCarousel
-            images={slides}
-            intervalMs={5000}
-            slidesToShow={3}
+           images={slides}
+           intervalMs={5000}
+           slidesToShow={2}               // muestro 2 al tiempo
+           className="mx-auto h-56" 
           />
         </div>
       </div>
