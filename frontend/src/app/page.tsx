@@ -28,7 +28,7 @@ export default function Dashboard() {
           Noticias del día
         </h3>
         <div className="mx-auto max-w-screen-2xl px-4">
-          <NewsCarousel images={slides} intervalMs={5000} slidesToShow={4} />
+          <NewsCarousel images={slides} intervalMs={5000} slidesToShow={5} />
           
         </div>
       </div>
