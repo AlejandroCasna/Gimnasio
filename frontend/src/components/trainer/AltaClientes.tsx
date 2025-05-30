@@ -19,6 +19,14 @@ interface AltaClientesProps {
   onCreated: () => void
 }
 
+const LABELS: Record<keyof Omit<FormData, 'tipo'>, string> = {
+  username: 'Nombre de usuario',
+  first_name: 'Nombre',
+  last_name: 'Apellido',
+  email: 'Correo electrónico',
+  phone: 'Teléfono',
+}
+
 export default function AltaClientes({ onCreated }: AltaClientesProps) {
   const [form, setForm] = useState<FormData>({
     username: '',
@@ -67,7 +75,7 @@ export default function AltaClientes({ onCreated }: AltaClientesProps) {
         <Input
           key={k}
           type={k === 'email' ? 'email' : 'text'}
-          placeholder={k.replace('_',' ')}
+          placeholder={LABELS[k]}
           value={form[k]}
           onChange={e =>
             setForm(f => ({ ...f, [k]: e.target.value }))
