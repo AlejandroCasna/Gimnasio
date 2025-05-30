@@ -13,6 +13,7 @@ interface Node {
   label:    ReactNode
   children?: Node[]
   qrKey?:   string
+  url?:     string
 }
 
 // — Tu árbol de opciones
@@ -105,10 +106,18 @@ const tree: Node[] = [
   },
    {
      label: <span className="font-lato">Entrenamiento a distancia</span>,
-     children: [
-       { label: 'Running', qrKey: 'running' },
-       { label: 'Fuerza en Gimnasio', qrKey: 'gimnasio' },
-       { label: 'Híbrido', qrKey: 'hibrido' },
+     children: [{
+       label: <span className="font-lato">Running</span>,
+       url: 'https://wa.me/55XXXXXXXXXX'    // número 1
+     },
+     {
+       label: <span className="font-lato">Fuerza en Gimnasio</span>,
+       url: 'https://wa.me/55XXXXXXXXXX'    // mismo número 1
+     },
+     {
+       label: <span className="font-lato">Híbrido</span>,
+       url: 'https://wa.me/55YYYYYYYYYY'    // número 2
+     },
      ]
    }
  ]
