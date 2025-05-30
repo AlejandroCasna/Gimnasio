@@ -1,3 +1,4 @@
+// src/components/NewsBanner.tsx
 'use client'
 
 import Image from 'next/image'
@@ -16,26 +17,37 @@ const news: NewsItem[] = [
 
 export default function NewsBanner() {
   return (
-    <section className="w-full bg-[url('/banner-bg.jpg')] bg-cover bg-center py-12">
-      <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-3xl font-bold text-white mb-6 text-center">
+    <section className="relative w-full overflow-hidden bg-gray-900/60 py-8">
+      {/* Capa de fondo semitransparente */}
+      <div
+        className="absolute inset-0 bg-[url('/banner-bg.jpg')] bg-cover bg-center opacity-30"
+        aria-hidden
+      />
+
+      <div className="relative max-w-7xl mx-auto px-4">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-8 text-center drop-shadow-lg">
           Noticias del día
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {news.map(item => (
-            <div key={item.id} className="group relative overflow-hidden rounded-xl shadow-xl">
-              {/* Imagen grande */}
-              <div className="relative h-64 w-full">
+            <div
+              key={item.id}
+              className="relative group overflow-hidden rounded-lg shadow-xl"
+            >
+              {/* ratio 16:9 (necesitas @tailwindcss/aspect-ratio) */}
+              <div className="aspect-w-16 aspect-h-9 w-full">
                 <Image
-                  src={`/${item.img}`}    // OJO: la slash inicial es clave
+                  src={`/${item.img}`}
                   alt={item.title}
                   fill
                   className="object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               </div>
+
               {/* Overlay con texto */}
-              <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <h3 className="text-lg text-white font-semibold">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-end">
+                <h3 className="text-lg font-semibold text-white">
                   {item.title}
                 </h3>
                 <p className="mt-1 text-sm text-gray-300">
