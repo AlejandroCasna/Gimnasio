@@ -1,18 +1,11 @@
 // frontend/src/app/page.tsx
 import Hero from '@/components/Hero'
 import MamushkaNav from '@/components/MamushkaNav'
-import NewsCarousel from '@/components/NewsCarousel'
+// IMPORTA SOLO NewsBanner
+import NewsBanner from '@/components/NewsBanner'
 
 export default function Dashboard() {
-  const slides = [
-    { src: '/1.jpg', alt: 'Noticia A' },
-    { src: '/2.jpg', alt: 'Noticia B' },
-    { src: '/3.jpg', alt: 'Noticia C' },
-    { src: '/4.png', alt: 'Noticia C' },
-    { src: '/5.png', alt: 'Noticia C' },
-  ]
-
-return (
+  return (
     <>
       <Hero />
 
@@ -23,14 +16,8 @@ return (
         <MamushkaNav />
       </section>
 
-      <div className="w-full bg-zinc-900 py-8">
-        <h3 className="text-xl font-semibold text-white mb-4 text-center">
-          Noticias del día
-        </h3>
-        <div className="mx-auto max-w-screen-2xl px-4">
-          <NewsCarousel images={slides} intervalMs={5000} />
-        </div>
-      </div>
+      {/* ← Aquí sustituyes el viejo NewsCarousel por tu NewsBanner */}
+      <NewsBanner />
     </>
   )
- }
+}

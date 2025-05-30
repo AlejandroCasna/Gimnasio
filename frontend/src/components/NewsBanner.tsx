@@ -6,7 +6,7 @@ import Image from 'next/image'
 interface NewsItem {
   id: number
   title: string
-  img: string   // e.g. "1.jpg", debe estar en public/
+  img: string
 }
 
 const news: NewsItem[] = [
@@ -18,7 +18,6 @@ const news: NewsItem[] = [
 export default function NewsBanner() {
   return (
     <section className="relative w-full overflow-hidden bg-gray-900/60 py-8">
-      {/* Capa de fondo semitransparente */}
       <div
         className="absolute inset-0 bg-[url('/banner-bg.jpg')] bg-cover bg-center opacity-30"
         aria-hidden
@@ -35,7 +34,6 @@ export default function NewsBanner() {
               key={item.id}
               className="relative group overflow-hidden rounded-lg shadow-xl"
             >
-              {/* ratio 16:9 (necesitas @tailwindcss/aspect-ratio) */}
               <div className="aspect-w-16 aspect-h-9 w-full">
                 <Image
                   src={`/${item.img}`}
@@ -45,7 +43,6 @@ export default function NewsBanner() {
                 />
               </div>
 
-              {/* Overlay con texto */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 flex flex-col justify-end">
                 <h3 className="text-lg font-semibold text-white">
                   {item.title}
