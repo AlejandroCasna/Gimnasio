@@ -19,7 +19,7 @@ interface Node {
 // — Tu árbol de opciones
 const tree: Node[] = [
   {
-    label: <span className="font-lato">Entrenamiento presencial Grupal</span>,
+    label: <span className="font-lato">ENTRENAMIENTO PRESENCIAL GRUPAL</span>,
     children: [
       {
         label: (
