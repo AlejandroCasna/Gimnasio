@@ -35,7 +35,7 @@ export default function Hero() {
         "
       >
         <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold drop-shadow">
-          Entrena a tu medida
+          ENTRENA A TU MEDIDA
         </h1>
         <p className="mt-2 text-sm sm:text-base md:text-lg">
           Planes presenciales, online y grupales.
