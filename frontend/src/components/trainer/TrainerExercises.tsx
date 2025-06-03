@@ -3,7 +3,6 @@
 
 import { useState, useEffect, FormEvent } from 'react'
 import axios from 'axios'
-import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
 
@@ -14,22 +13,21 @@ interface Exercise {
 }
 
 export default function TrainerExercises() {
-  // 1) Estado para la lista de ejercicios
+  // — 1) Estados
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [loading, setLoading]     = useState<boolean>(true)
   const [error, setError]         = useState<string | null>(null)
 
-  // 2) Estado para el formulario: nombre + video_url
   const [name, setName] = useState('')
   const [url,  setUrl]  = useState('')
 
-  // 3) Al montar, cargar todos los ejercicios desde el backend vía axios GET absoluto
+  // — 2) Cuando el componente monta, carga la lista desde 
+  //    https://eltemplo.pythonanywhere.com/trainer/exercises/
   useEffect(() => {
     const fetchExercises = async () => {
       try {
-        // <- Aquí apuntamos a /api/trainer/exercises/, no a /trainer/exercises/
         const resp = await axios.get<Exercise[]>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/trainer/exercises/`
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/trainer/exercises/`
         )
         setExercises(resp.data)
       } catch (err: any) {
@@ -42,7 +40,7 @@ export default function TrainerExercises() {
     fetchExercises()
   }, [])
 
-  // 4) Función para crear un nuevo ejercicio (POST a /api/trainer/exercises/)
+  // — 3) Crear un nuevo ejercicio (POST a misma ruta)
   const handleAdd = async (e: FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -54,15 +52,22 @@ export default function TrainerExercises() {
 
     try {
       const payload = { name: name.trim(), video_url: url.trim() }
-      // Como `api.baseURL === NEXT_PUBLIC_BACKEND_URL + '/api/'`,
-      // api.post('/trainer/exercises/', …) va a:
-      //   https://eltemplo.pythonanywhere.com/api/trainer/exercises/
-      const resp = await api.post<Exercise>('/trainer/exercises/', payload)
+      const resp = await axios.post<Exercise>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/trainer/exercises/`,
+        payload,
+        {
+          headers: { 'Content-Type': 'application/json' },
+          // si tu backend requiere token, se inyectará automáticamente 
+          // porque axios.interceptors.request ya lo hace en lib/api.ts,
+          // pero aquí usamos axios directo, así que:
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('accessToken') ?? ''}`
+          }
+        }
+      )
 
-      // Añadir el ejercicio recién creado al estado
       setExercises(prev => [...prev, resp.data])
-
-      // Limpiar el formulario
       setName('')
       setUrl('')
     } catch (err: any) {
@@ -71,15 +76,19 @@ export default function TrainerExercises() {
     }
   }
 
-  // 5) Función para eliminar un ejercicio (DELETE a /api/trainer/exercises/{id}/)
+  // — 4) Eliminar un ejercicio (DELETE a /trainer/exercises/{id}/)
   const handleDelete = async (id: number) => {
     if (!confirm('¿Seguro que quieres eliminar este ejercicio?')) return
 
     try {
-      // De nuevo, `api.delete('/trainer/exercises/${id}/')` → 
-      //  https://eltemplo.pythonanywhere.com/api/trainer/exercises/{id}/
-      await api.delete(`/trainer/exercises/${id}/`)
-      // Filtrar ese ejercicio del estado
+      await axios.delete(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/trainer/exercises/${id}/`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken') ?? ''}`
+          }
+        }
+      )
       setExercises(prev => prev.filter(ex => ex.id !== id))
     } catch (err: any) {
       console.error('Error al eliminar ejercicio:', err)
@@ -157,11 +166,9 @@ export default function TrainerExercises() {
                 key={ex.id}
                 className="flex items-center justify-between bg-gray-50 dark:bg-zinc-700 p-3 rounded hover:bg-gray-100 dark:hover:bg-zinc-600 transition-colors"
               >
-                <div>
-                  <p className="text-gray-800 dark:text-gray-100 font-medium">
-                    {ex.name}
-                  </p>
-                </div>
+                <p className="text-gray-800 dark:text-gray-100 font-medium">
+                  {ex.name}
+                </p>
                 <div className="flex items-center space-x-4">
                   <a
                     href={ex.video_url}
