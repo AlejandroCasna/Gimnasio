@@ -5,7 +5,7 @@ import { useTheme }  from 'next-themes'
 
 import Link          from 'next/link'
 import LoginModal from './LoginModal'
-import {Instagram, MessageSquare } from 'lucide-react'
+import {Instagram, LogIn, MessageSquare } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useState, useEffect } from 'react'
 
@@ -93,11 +93,13 @@ export default function Header() {
               </button>
             </div>
           ) : (
-            !loading && (
-              <Link href="/login" className="hover:underline">
-                Iniciar sesión
-              </Link>
-            )
+            <button
+              onClick={() => setIsLoginOpen(true)}
+              className="flex items-center gap-1 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+            >
+              <LogIn className="h-4 w-4" />
+              Iniciar sesión
+            </button>
           )}
         </nav>
       </div>
