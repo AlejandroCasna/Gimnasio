@@ -37,7 +37,7 @@ export default function Hero() {
         <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold drop-shadow">
           ENTRENA A TU MEDIDA
         </h1>
-        <p className="mt-2 text-sm sm:text-base md:text-lg">
+        <p className="mt-3 text-sm sm:text-base md:text-lg">
           Planes presenciales, online y grupales.
         </p>
       </div>

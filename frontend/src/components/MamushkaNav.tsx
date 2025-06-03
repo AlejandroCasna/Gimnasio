@@ -50,24 +50,29 @@ const tree: Node[] = [
           {
             label: <span className="font-lato">Running</span>,
             children: [
-              { label: '1 vez a la semana', children: [{ label: '$25.000', qrKey: '1_semana' }] },
+              { label: '1 vez a la semana',   children: [{ label: '$25.000', qrKey: '1_semana' }] },
               { label: '2 veces a la semana', children: [{ label: '$32.000', qrKey: '2_semanas' }] },
-              { label: '3 veces a la semana', children: [{ label: '$35.000', qrKey: '3_semanas' }] },
-              { label: '4 veces a la semana', children: [{ label: '$38.000', qrKey: '4_semanas' }] },
-              { label: 'Libre', children: [{ label: '$42.000', qrKey: 'libre' }] },
             ]
           },
           {
             label: <span className="font-lato">Mixto</span>,
             children: [
-              { label: '1 vez a la semana', children: [{ label: '$25.000', qrKey: '1_semana' }] },
-              { label: '2 veces a la semana', children: [{ label: '$32.000', qrKey: '2_semanas' }] },
-              { label: '3 veces a la semana', children: [{ label: '$35.000', qrKey: '3_semanas' }] },
-              { label: '4 veces a la semana', children: [{ label: '$38.000', qrKey: '4_semanas' }] },
-              { label: 'Libre', children: [{ label: '$42.000', qrKey: 'libre' }] },
-              ]
-        },
-        ]     },
+              {
+                label: '3 veces a la semana (2 Running + 1 Funcional)',
+                qrKey: 'mixto_3'
+              },
+              {
+                label: '4 veces a la semana (2 Running + 2 Funcional)',
+                qrKey: 'mixto_4'
+              },
+              {
+                label: 'Libre (Máx 2 Running + Funcional ilimitado)',
+                qrKey: 'mixto_libre'
+              },
+            ]
+          },
+        ]
+      },
       {
         label: <span className="font-lato">Local 2</span>,
         children: [
@@ -91,7 +96,7 @@ const tree: Node[] = [
     ]
   },
   {
-    label: <span className="font-lato">Entrenamiento personalizado</span>,
+    label: <span className="font-lato">ENTRENAMIENTO PERSONALIZADO</span>,
     children: profes.map((prof: Profe) => ({
       // cada profe se renderiza con tu ProfeCard
       label: (
@@ -105,18 +110,18 @@ const tree: Node[] = [
     })),
   },
    {
-     label: <span className="font-lato">Entrenamiento a distancia</span>,
+     label: <span className="font-lato">ENTRENAMIENTO A DISTANCIA</span>,
      children: [{
        label: <span className="font-lato">Running</span>,
-       url: 'https://wa.me/55XXXXXXXXXX'    // número 1
+       url: 'https://wa.me/5491134481256'    // número 1
      },
      {
-       label: <span className="font-lato">Fuerza en Gimnasio</span>,
-       url: 'https://wa.me/55XXXXXXXXXX'    // mismo número 1
+       label: <span className="font-lato">Running + Funcional</span>,
+       url: 'https://wa.me/5491134481256'    // mismo número 1
      },
      {
        label: <span className="font-lato">Híbrido</span>,
-       url: 'https://wa.me/55YYYYYYYYYY'    // número 2
+       url: 'https://wa.me/34672093147'    // número 2
      },
      ]
    }
@@ -132,6 +137,8 @@ const PRICE_MAP: Record<string, number> = {
   running:     20000,
   gimnasio:    30000,
   hibrido:     27000,
+  'mixto_3':     35000,  
+  'mixto_libre': 42000,
 }
 
 export default function MamushkaNav() {
