@@ -13,25 +13,21 @@ interface Exercise {
 }
 
 export default function TrainerExercises() {
-  // 1) Estados para la lista, carga y posibles errores
+  // 1) Estado para la lista de ejercicios
   const [exercises, setExercises] = useState<Exercise[]>([])
-  const [loading, setLoading]     = useState<boolean>(true)
-  const [error, setError]         = useState<string | null>(null)
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // 2) Estados para el formulario
+  // 2) Estado para el formulario (nombre + url del video)
   const [name, setName] = useState('')
-  const [url,  setUrl]  = useState('')
+  const [url, setUrl] = useState('')
 
-  // 3) Al montar el componente, pedimos la lista de ejercicios:
+  // 3) Al montar, cargamos todos los ejercicios desde el backend
   useEffect(() => {
     const fetchExercises = async () => {
-      setLoading(true)
       try {
-        // **USAMOS api.get('trainer/exercises/')** en lugar de axios.get('/api/...') o axios.get(BASEURL/...)
-        // De esta forma 'api' ya sabe que su baseURL es
-        //    https://ElTemplo.pythonanywhere.com/api/
-        // y concatenará 'trainer/exercises/' → 'https://ElTemplo.pythonanywhere.com/api/trainer/exercises/'
-        const resp = await api.get<Exercise[]>('trainer/exercises/')
+        // Atención: la ruta es “exercises/” (tal cual), SIN “trainer/”
+        const resp = await api.get<Exercise[]>('exercises/')
         setExercises(resp.data)
       } catch (err: any) {
         console.error('Error al cargar ejercicios:', err)
@@ -43,7 +39,7 @@ export default function TrainerExercises() {
     fetchExercises()
   }, [])
 
-  // 4) Función para añadir un ejercicio nuevo
+  // 4) Función para crear un nuevo ejercicio
   const handleAdd = async (e: FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -55,9 +51,13 @@ export default function TrainerExercises() {
 
     try {
       const payload = { name: name.trim(), video_url: url.trim() }
-      // **POST a 'trainer/exercises/'** (la baseURL ya incluye '/api/')
-      const resp = await api.post<Exercise>('trainer/exercises/', payload)
+      // Aquí también usamos “exercises/” para el POST
+      const resp = await api.post<Exercise>('exercises/', payload)
+
+      // Añadimos el ejercicio recién creado al estado
       setExercises(prev => [...prev, resp.data])
+
+      // Limpiamos el formulario
       setName('')
       setUrl('')
     } catch (err: any) {
@@ -66,13 +66,13 @@ export default function TrainerExercises() {
     }
   }
 
-  // 5) Función para eliminar un ejercicio dado su id
+  // 5) Función para eliminar un ejercicio
   const handleDelete = async (id: number) => {
     if (!confirm('¿Seguro que quieres eliminar este ejercicio?')) return
 
     try {
-      // **DELETE a 'trainer/exercises/{id}/'**
-      await api.delete(`trainer/exercises/${id}/`)
+      // Y aquí borramos /api/exercises/{id}/
+      await api.delete(`exercises/${id}/`)
       setExercises(prev => prev.filter(ex => ex.id !== id))
     } catch (err: any) {
       console.error('Error al eliminar ejercicio:', err)
@@ -82,7 +82,7 @@ export default function TrainerExercises() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-8 py-8">
-      {/* ───── Formulario para crear un ejercicio ───── */}
+      {/* — Formulario para crear un ejercicio */}
       <section className="bg-white dark:bg-zinc-800 p-6 rounded-lg shadow">
         <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
           Crear nuevo ejercicio
@@ -127,29 +127,22 @@ export default function TrainerExercises() {
             />
           </div>
 
-          <Button
-            type="submit"
-            className="bg-red-600 hover:bg-red-700 text-white"
-          >
+          <Button type="submit" className="bg-red-600 hover:bg-red-700 text-white">
             Añadir ejercicio
           </Button>
         </form>
       </section>
 
-      {/* ───── Listado de ejercicios ya creados ───── */}
+      {/* — Listado de ejercicios ya creados */}
       <section className="bg-white dark:bg-zinc-800 p-6 rounded-lg shadow">
         <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
           Ejercicios creados
         </h2>
 
         {loading ? (
-          <p className="text-gray-600 dark:text-gray-400">
-            Cargando ejercicios…
-          </p>
+          <p className="text-gray-600 dark:text-gray-400">Cargando ejercicios…</p>
         ) : exercises.length === 0 ? (
-          <p className="text-gray-600 dark:text-gray-400">
-            No hay ejercicios registrados aún.
-          </p>
+          <p className="text-gray-600 dark:text-gray-400">No hay ejercicios registrados aún.</p>
         ) : (
           <ul className="space-y-2">
             {exercises.map(ex => (
