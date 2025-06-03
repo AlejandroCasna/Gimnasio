@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useEffect, FormEvent } from 'react'
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
 
@@ -22,34 +22,71 @@ export default function TrainerExercises() {
   const [name, setName] = useState('')
   const [url,  setUrl]  = useState('')
 
-  // 3) Prepara la URL base “completa” de tu backend (sin slash final)
+  // 3) En construccin, guardamos la “base” del BACKEND (sin slash final)
   const BACKEND = (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/$/, '')
 
-  // 4) Al montar, cargamos los ejercicios desde el endpoint absoluto:
+  // 4) Ruta que usaremos finalmente (se inicializa vacía)
+  const [endpoint, setEndpoint] = useState<string>('')
+
+  // 5) Al montar, comprobamos cuál variante funciona:
   useEffect(() => {
-    const fetchExercises = async () => {
+    const testEndpoint = async () => {
+      // 5a) Intento 1: BACKEND + "/trainer/exercises/"
       try {
-        const resp = await axios.get<Exercise[]>(
-          `${BACKEND}/api/trainer/exercises/`,
-          {
-            headers: { 'Content-Type': 'application/json' },
-            withCredentials: true,
-            // Si guardas token en localStorage y quieres enviarlo:
-            // Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-          }
-        )
+        await axios.get(`${BACKEND}/trainer/exercises/`, {
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true,
+        })
+        // si no lanza 404, esa es la URL correcta:
+        setEndpoint(`${BACKEND}/trainer/exercises/`)
+        return
+      } catch (err: any) {
+        if ((err as AxiosError).response?.status !== 404) {
+          console.error('Error distinto de 404 al probar /trainer/exercises/:', err)
+        }
+      }
+
+      // 5b) Intento 2: BACKEND + "/api/trainer/exercises/"
+      try {
+        await axios.get(`${BACKEND}/api/trainer/exercises/`, {
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true,
+        })
+        setEndpoint(`${BACKEND}/api/trainer/exercises/`)
+        return
+      } catch (err: any) {
+        console.error('No se encontró /trainer/exercises/ ni /api/trainer/exercises/:', err)
+        setError('No se pudo localizar el endpoint de ejercicios en el backend.')
+      }
+    }
+
+    testEndpoint()
+      .finally(() => setLoading(false))
+  }, [BACKEND])
+
+  // 6) Una vez decidido “endpoint”, cargamos la lista real
+  useEffect(() => {
+    if (!endpoint) return
+
+    const fetchExercises = async () => {
+      setLoading(true)
+      try {
+        const resp = await axios.get<Exercise[]>(endpoint, {
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true,
+        })
         setExercises(resp.data)
       } catch (err: any) {
-        console.error('Error al cargar ejercicios:', err)
+        console.error('Error al cargar ejercicios desde', endpoint, err)
         setError('No se pudo cargar la lista de ejercicios.')
       } finally {
         setLoading(false)
       }
     }
     fetchExercises()
-  }, [BACKEND])
+  }, [endpoint])
 
-  // 5) Función para crear un nuevo ejercicio
+  // 7) Función para crear un nuevo ejercicio
   const handleAdd = async (e: FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -58,48 +95,42 @@ export default function TrainerExercises() {
       setError('El nombre y la URL no pueden estar vacíos.')
       return
     }
+    if (!endpoint) {
+      setError('Endpoint no inicializado todavía.')
+      return
+    }
 
     try {
       const payload = { name: name.trim(), video_url: url.trim() }
-      const resp = await axios.post<Exercise>(
-        `${BACKEND}/api/trainer/exercises/`,
-        payload,
-        {
-          headers: { 'Content-Type': 'application/json' },
-          withCredentials: true,
-          // Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-        }
-      )
-
-      // Añadimos el ejercicio recién creado al estado
+      const resp = await axios.post<Exercise>(endpoint, payload, {
+        headers: { 'Content-Type': 'application/json' },
+        withCredentials: true,
+      })
       setExercises(prev => [...prev, resp.data])
-
-      // Limpiamos el formulario
       setName('')
       setUrl('')
     } catch (err: any) {
-      console.error('Error al crear ejercicio:', err)
+      console.error('Error al crear ejercicio en', endpoint, err)
       setError('No se pudo crear el ejercicio.')
     }
   }
 
-  // 6) Función para eliminar un ejercicio
+  // 8) Función para eliminar un ejercicio
   const handleDelete = async (id: number) => {
     if (!confirm('¿Seguro que quieres eliminar este ejercicio?')) return
+    if (!endpoint) {
+      setError('Endpoint no inicializado todavía.')
+      return
+    }
 
     try {
-      await axios.delete(
-        `${BACKEND}/api/trainer/exercises/${id}/`,
-        {
-          headers: { 'Content-Type': 'application/json' },
-          withCredentials: true,
-          // Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-        }
-      )
-      // Filtramos ese ejercicio del estado local
+      await axios.delete(`${endpoint}${id}/`, {
+        headers: { 'Content-Type': 'application/json' },
+        withCredentials: true,
+      })
       setExercises(prev => prev.filter(ex => ex.id !== id))
     } catch (err: any) {
-      console.error('Error al eliminar ejercicio:', err)
+      console.error('Error al eliminar ejercicio', id, 'en', endpoint, err)
       setError('No se pudo eliminar el ejercicio.')
     }
   }
@@ -151,7 +182,11 @@ export default function TrainerExercises() {
             />
           </div>
 
-          <Button type="submit" className="bg-red-600 hover:bg-red-700 text-white">
+          <Button
+            type="submit"
+            className="bg-red-600 hover:bg-red-700 text-white"
+            disabled={!endpoint}
+          >
             Añadir ejercicio
           </Button>
         </form>
@@ -175,7 +210,9 @@ export default function TrainerExercises() {
                 className="flex items-center justify-between bg-gray-50 dark:bg-zinc-700 p-3 rounded hover:bg-gray-100 dark:hover:bg-zinc-600 transition-colors"
               >
                 <div>
-                  <p className="text-gray-800 dark:text-gray-100 font-medium">{ex.name}</p>
+                  <p className="text-gray-800 dark:text-gray-100 font-medium">
+                    {ex.name}
+                  </p>
                 </div>
                 <div className="flex items-center space-x-4">
                   <a
