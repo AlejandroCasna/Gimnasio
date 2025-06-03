@@ -13,21 +13,31 @@ interface Exercise {
 }
 
 export default function TrainerExercises() {
-  // — 1) Estados
+  // 1) Estado para la lista de ejercicios
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [loading, setLoading]     = useState<boolean>(true)
   const [error, setError]         = useState<string | null>(null)
 
+  // 2) Estado para el formulario: nombre + video_url
   const [name, setName] = useState('')
   const [url,  setUrl]  = useState('')
 
-  // — 2) Cuando el componente monta, carga la lista desde 
-  //    https://eltemplo.pythonanywhere.com/trainer/exercises/
+  // 3) Prepara la URL base “completa” de tu backend
+  const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, '') || ''
+
+  // 4) Al montar, cargamos los ejercicios desde el backend (URL absoluta)
   useEffect(() => {
     const fetchExercises = async () => {
       try {
         const resp = await axios.get<Exercise[]>(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/trainer/exercises/`
+          `${BACKEND}/trainer/exercises/`,
+          {
+            headers: { 'Content-Type': 'application/json' },
+            withCredentials: true,
+            // Si tienes que pasar un token, axios lo inyectará aquí si lo guardaste en localStorage:
+            // Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+            // pero si ya usas un interceptor en api.ts, aquí no es necesario.
+          }
         )
         setExercises(resp.data)
       } catch (err: any) {
@@ -38,9 +48,9 @@ export default function TrainerExercises() {
       }
     }
     fetchExercises()
-  }, [])
+  }, [BACKEND])
 
-  // — 3) Crear un nuevo ejercicio (POST a misma ruta)
+  // 5) Función para crear un nuevo ejercicio
   const handleAdd = async (e: FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -53,21 +63,23 @@ export default function TrainerExercises() {
     try {
       const payload = { name: name.trim(), video_url: url.trim() }
       const resp = await axios.post<Exercise>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/trainer/exercises/`,
+        `${BACKEND}/trainer/exercises/`,
         payload,
         {
           headers: { 'Content-Type': 'application/json' },
-          // si tu backend requiere token, se inyectará automáticamente 
-          // porque axios.interceptors.request ya lo hace en lib/api.ts,
-          // pero aquí usamos axios directo, así que:
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${localStorage.getItem('accessToken') ?? ''}`
-          }
+          withCredentials: true,
+          // si necesitas enviar Authorization, puedes añadirlo aquí:
+          // headers: {
+          //   'Content-Type': 'application/json',
+          //   Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          // }
         }
       )
 
+      // Añadimos el ejercicio recién creado al estado
       setExercises(prev => [...prev, resp.data])
+
+      // Limpiamos el formulario
       setName('')
       setUrl('')
     } catch (err: any) {
@@ -76,19 +88,23 @@ export default function TrainerExercises() {
     }
   }
 
-  // — 4) Eliminar un ejercicio (DELETE a /trainer/exercises/{id}/)
+  // 6) Función para eliminar un ejercicio
   const handleDelete = async (id: number) => {
     if (!confirm('¿Seguro que quieres eliminar este ejercicio?')) return
 
     try {
       await axios.delete(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/trainer/exercises/${id}/`,
+        `${BACKEND}/trainer/exercises/${id}/`,
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken') ?? ''}`
-          }
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true,
+          // headers: {
+          //   'Content-Type': 'application/json',
+          //   Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          // }
         }
       )
+      // Filtramos ese ejercicio del estado local
       setExercises(prev => prev.filter(ex => ex.id !== id))
     } catch (err: any) {
       console.error('Error al eliminar ejercicio:', err)
@@ -104,7 +120,9 @@ export default function TrainerExercises() {
           Crear nuevo ejercicio
         </h2>
 
-        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+        {error && (
+          <p className="text-red-500 text-sm mb-2">{error}</p>
+        )}
 
         <form onSubmit={handleAdd} className="space-y-4">
           <div>
@@ -156,9 +174,7 @@ export default function TrainerExercises() {
         {loading ? (
           <p className="text-gray-600 dark:text-gray-400">Cargando ejercicios…</p>
         ) : exercises.length === 0 ? (
-          <p className="text-gray-600 dark:text-gray-400">
-            No hay ejercicios registrados aún.
-          </p>
+          <p className="text-gray-600 dark:text-gray-400">No hay ejercicios registrados aún.</p>
         ) : (
           <ul className="space-y-2">
             {exercises.map(ex => (
@@ -166,9 +182,9 @@ export default function TrainerExercises() {
                 key={ex.id}
                 className="flex items-center justify-between bg-gray-50 dark:bg-zinc-700 p-3 rounded hover:bg-gray-100 dark:hover:bg-zinc-600 transition-colors"
               >
-                <p className="text-gray-800 dark:text-gray-100 font-medium">
-                  {ex.name}
-                </p>
+                <div>
+                  <p className="text-gray-800 dark:text-gray-100 font-medium">{ex.name}</p>
+                </div>
                 <div className="flex items-center space-x-4">
                   <a
                     href={ex.video_url}
