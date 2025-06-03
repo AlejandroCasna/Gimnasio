@@ -26,7 +26,9 @@ export default function TrainerExercises() {
   useEffect(() => {
     const fetchExercises = async () => {
       try {
-        const resp = await api.get<Exercise[]>('/trainer/exercises/')
+        const resp = await api.get<Exercise[]>(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/trainer/exercises/`
+        )
         setExercises(resp.data)
       } catch (err: any) {
         console.error('Error al cargar ejercicios:', err)
@@ -37,7 +39,6 @@ export default function TrainerExercises() {
     }
     fetchExercises()
   }, [])
-
   // 4) Función para crear un nuevo ejercicio
   const handleAdd = async (e: FormEvent) => {
     e.preventDefault()
