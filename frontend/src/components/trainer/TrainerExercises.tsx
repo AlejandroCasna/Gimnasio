@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useEffect, FormEvent } from 'react'
-import axios, { AxiosError } from 'axios'
+import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
 
@@ -13,25 +13,25 @@ interface Exercise {
 }
 
 export default function TrainerExercises() {
-  // 1) Estado para la lista de ejercicios
+  // 1) Estados para la lista, carga y posibles errores
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [loading, setLoading]     = useState<boolean>(true)
   const [error, setError]         = useState<string | null>(null)
 
-  // 2) Estado para el formulario: nombre + video_url
+  // 2) Estados para el formulario
   const [name, setName] = useState('')
   const [url,  setUrl]  = useState('')
 
-  // 3) Al montar, cargamos la lista desde "/api/trainer/exercises/"
+  // 3) Al montar el componente, pedimos la lista de ejercicios:
   useEffect(() => {
     const fetchExercises = async () => {
       setLoading(true)
       try {
-        // LLAMO A "/api/trainer/exercises/" (Next.js redirige al backend real)
-        const resp = await axios.get<Exercise[]>('/api/trainer/exercises/', {
-          headers: { 'Content-Type': 'application/json' },
-          withCredentials: true,
-        })
+        // **USAMOS api.get('trainer/exercises/')** en lugar de axios.get('/api/...') o axios.get(BASEURL/...)
+        // De esta forma 'api' ya sabe que su baseURL es
+        //    https://ElTemplo.pythonanywhere.com/api/
+        // y concatenará 'trainer/exercises/' → 'https://ElTemplo.pythonanywhere.com/api/trainer/exercises/'
+        const resp = await api.get<Exercise[]>('trainer/exercises/')
         setExercises(resp.data)
       } catch (err: any) {
         console.error('Error al cargar ejercicios:', err)
@@ -43,7 +43,7 @@ export default function TrainerExercises() {
     fetchExercises()
   }, [])
 
-  // 4) Función para crear un nuevo ejercicio
+  // 4) Función para añadir un ejercicio nuevo
   const handleAdd = async (e: FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -55,38 +55,24 @@ export default function TrainerExercises() {
 
     try {
       const payload = { name: name.trim(), video_url: url.trim() }
-      // POST a "/api/trainer/exercises/"
-      const resp = await axios.post<Exercise>(
-        '/api/trainer/exercises/',
-        payload,
-        {
-          headers: { 'Content-Type': 'application/json' },
-          withCredentials: true,
-        }
-      )
-      // Añadimos el ejercicio nuevo al estado local
+      // **POST a 'trainer/exercises/'** (la baseURL ya incluye '/api/')
+      const resp = await api.post<Exercise>('trainer/exercises/', payload)
       setExercises(prev => [...prev, resp.data])
       setName('')
       setUrl('')
     } catch (err: any) {
       console.error('Error al crear ejercicio:', err)
-      // Si el backend devuelve 404 o cualquier otro error:
-      const msg = (err as AxiosError).response?.data || 'No se pudo crear el ejercicio.'
-      setError(typeof msg === 'string' ? msg : 'No se pudo crear el ejercicio.')
+      setError('No se pudo crear el ejercicio.')
     }
   }
 
-  // 5) Función para eliminar un ejercicio
+  // 5) Función para eliminar un ejercicio dado su id
   const handleDelete = async (id: number) => {
     if (!confirm('¿Seguro que quieres eliminar este ejercicio?')) return
 
     try {
-      // DELETE a "/api/trainer/exercises/{id}/"
-      await axios.delete(`/api/trainer/exercises/${id}/`, {
-        headers: { 'Content-Type': 'application/json' },
-        withCredentials: true,
-      })
-      // Lo quitamos del estado
+      // **DELETE a 'trainer/exercises/{id}/'**
+      await api.delete(`trainer/exercises/${id}/`)
       setExercises(prev => prev.filter(ex => ex.id !== id))
     } catch (err: any) {
       console.error('Error al eliminar ejercicio:', err)
@@ -96,7 +82,7 @@ export default function TrainerExercises() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-8 py-8">
-      {/* — Formulario para crear un ejercicio */}
+      {/* ───── Formulario para crear un ejercicio ───── */}
       <section className="bg-white dark:bg-zinc-800 p-6 rounded-lg shadow">
         <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
           Crear nuevo ejercicio
@@ -150,16 +136,20 @@ export default function TrainerExercises() {
         </form>
       </section>
 
-      {/* — Listado de ejercicios ya creados */}
+      {/* ───── Listado de ejercicios ya creados ───── */}
       <section className="bg-white dark:bg-zinc-800 p-6 rounded-lg shadow">
         <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
           Ejercicios creados
         </h2>
 
         {loading ? (
-          <p className="text-gray-600 dark:text-gray-400">Cargando ejercicios…</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            Cargando ejercicios…
+          </p>
         ) : exercises.length === 0 ? (
-          <p className="text-gray-600 dark:text-gray-400">No hay ejercicios registrados aún.</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            No hay ejercicios registrados aún.
+          </p>
         ) : (
           <ul className="space-y-2">
             {exercises.map(ex => (
@@ -168,9 +158,7 @@ export default function TrainerExercises() {
                 className="flex items-center justify-between bg-gray-50 dark:bg-zinc-700 p-3 rounded hover:bg-gray-100 dark:hover:bg-zinc-600 transition-colors"
               >
                 <div>
-                  <p className="text-gray-800 dark:text-gray-100 font-medium">
-                    {ex.name}
-                  </p>
+                  <p className="text-gray-800 dark:text-gray-100 font-medium">{ex.name}</p>
                 </div>
                 <div className="flex items-center space-x-4">
                   <a
