@@ -3,6 +3,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { api } from '@/lib/api'
+import LoginModal from '@/components/LoginModal'
 
 export interface User {
   id: number
@@ -18,6 +19,7 @@ interface AuthContextType {
   loading: boolean
   login: (username: string, password: string) => Promise<void>
   logout: () => void
+  openLoginModal: () => void
 }
 
 const AuthCtx = createContext<AuthContextType>({
@@ -25,18 +27,21 @@ const AuthCtx = createContext<AuthContextType>({
   loading: true,
   login: async () => {},
   logout: () => {},
+  openLoginModal: () => {},
 })
 
 
-const publicPaths = ['/', '/login', '/register', '/about', '/profes']
+const publicPaths = ['/', '', '/register', '/about', '/profes']
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser]       = useState<User | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const router                = useRouter()
-  const pathname              = usePathname()
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const router = useRouter()
+  const pathname = usePathname()
 
-  // 1) Al montar: si hay token lo inyectamos y cargamos perfil
+  const publicPaths = ['/', '/about', '/register'] // Quita '/login'
+
   useEffect(() => {
     const token = localStorage.getItem('accessToken')
     if (token) {
@@ -53,14 +58,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  // 2) Protege rutas client-side
+  // Protegemos rutas client‐side: si no hay user y la ruta no es pública,
+  // en vez de redirigir a /login, abrimos modal
   useEffect(() => {
     if (loading) return
-    if (publicPaths.includes(pathname) || pathname.startsWith('/profes/')) {return}
-    if (!user) router.replace('/login')
-  }, [loading, pathname, user, router])
+    if (publicPaths.includes(pathname)) return
+    if (!user) {
+      // En lugar de hacer router.replace('/login'), abrimos el modal:
+      setShowLoginModal(true)
+    }
+  }, [loading, pathname, user])
 
-  // 3) Función de login
   async function login(username: string, password: string) {
     const { data } = await api.post('token/', { username, password })
     const { access, refresh } = data
@@ -69,26 +77,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     api.defaults.headers.common['Authorization'] = `Bearer ${access}`
     const me = await api.get<User>('me/')
     setUser(me.data)
-    
+    setShowLoginModal(false)
     if (me.data.groups.includes('Trainer')) {
-      router.push('/dashboard/trainer')} 
-    else {
+      router.push('/dashboard/trainer')
+    } else {
       router.push('/dashboard/client')
-}
+    }
   }
 
-  // 4) Función de logout
   function logout() {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
     delete api.defaults.headers.common['Authorization']
     setUser(null)
-    router.push('/login')
+    // Opcional: si te deslogueas estando en ruta privada, abre modal de login:
+    setShowLoginModal(true)
   }
 
+  const openLoginModal = () => setShowLoginModal(true)
+  const closeLoginModal = () => setShowLoginModal(false)
+
   return (
-    <AuthCtx.Provider value={{ user, loading, login, logout }}>
+    <AuthCtx.Provider
+      value={{
+        user,
+        loading,
+        login,
+        logout,
+        openLoginModal,
+      }}
+    >
       {children}
+      {/* Montamos el modal automáticamente si showLoginModal === true */}
+      <LoginModal isOpen={showLoginModal} onClose={closeLoginModal} />
     </AuthCtx.Provider>
   )
 }

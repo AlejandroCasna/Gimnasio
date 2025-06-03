@@ -2,8 +2,9 @@
 'use client'
 
 import { useTheme }  from 'next-themes'
-import { useRouter } from 'next/navigation'
+
 import Link          from 'next/link'
+import LoginModal from './LoginModal'
 import {Instagram, MessageSquare } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useState, useEffect } from 'react'
@@ -11,13 +12,9 @@ import { useState, useEffect } from 'react'
 export default function Header() {
   const { theme, setTheme } = useTheme()
   const { user, loading }   = useAuth()
-  const router              = useRouter()
+  const [isLoginOpen, setIsLoginOpen] = useState(false)
 
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
+ 
   const toggleTheme = () =>
     setTheme(theme === 'dark' ? 'light' : 'dark')
 
@@ -104,6 +101,8 @@ export default function Header() {
           )}
         </nav>
       </div>
+    {/* Aquí incluimos el modal */}
+      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
     </header>
   )
 }
