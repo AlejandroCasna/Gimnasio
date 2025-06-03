@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useEffect, FormEvent } from 'react'
+import axios from 'axios'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
@@ -15,18 +16,21 @@ interface Exercise {
 export default function TrainerExercises() {
   // 1) Estado para la lista de ejercicios
   const [exercises, setExercises] = useState<Exercise[]>([])
-  const [loading, setLoading]         = useState<boolean>(true)
-  const [error, setError]             = useState<string | null>(null)
+  const [loading, setLoading]     = useState<boolean>(true)
+  const [error, setError]         = useState<string | null>(null)
 
   // 2) Estado para el formulario: nombre + video_url
   const [name, setName] = useState('')
   const [url,  setUrl]  = useState('')
 
-  // 3) Al montar, cargar todos los ejercicios desde el backend
+  // 3) Al montar, cargar todos los ejercicios desde el backend vía axios GET absoluto
   useEffect(() => {
     const fetchExercises = async () => {
       try {
-        const resp = await api.get<Exercise[]>(
+        const resp = await axios.get<Exercise[]>(
+          // Aquí usamos la URL completa sin /api/ extra, porque tu endpoint real es:
+          //    https://eltemplo.pythonanywhere.com/trainer/exercises/
+          // y axios la resuelve correctamente. 
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/trainer/exercises/`
         )
         setExercises(resp.data)
@@ -39,7 +43,8 @@ export default function TrainerExercises() {
     }
     fetchExercises()
   }, [])
-  // 4) Función para crear un nuevo ejercicio
+
+  // 4) Función para crear un nuevo ejercicio (POST a /api/trainer/exercises/)
   const handleAdd = async (e: FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -51,6 +56,9 @@ export default function TrainerExercises() {
 
     try {
       const payload = { name: name.trim(), video_url: url.trim() }
+      // Aquí usamos `api.post` porque `api.defaults.baseURL === NEXT_PUBLIC_BACKEND_URL + '/api/'`,
+      // así que api.post('/trainer/exercises/', …) va a:
+      //   https://eltemplo.pythonanywhere.com/api/trainer/exercises/
       const resp = await api.post<Exercise>('/trainer/exercises/', payload)
 
       // Añadir el ejercicio recién creado al estado
@@ -65,11 +73,13 @@ export default function TrainerExercises() {
     }
   }
 
-  // 5) Función para eliminar un ejercicio
+  // 5) Función para eliminar un ejercicio (DELETE a /api/trainer/exercises/{id}/)
   const handleDelete = async (id: number) => {
     if (!confirm('¿Seguro que quieres eliminar este ejercicio?')) return
 
     try {
+      // De nuevo, `api.delete('/trainer/exercises/${id}/')` → 
+      //  https://eltemplo.pythonanywhere.com/api/trainer/exercises/{id}/
       await api.delete(`/trainer/exercises/${id}/`)
       // Filtrar ese ejercicio del estado
       setExercises(prev => prev.filter(ex => ex.id !== id))
@@ -87,13 +97,14 @@ export default function TrainerExercises() {
           Crear nuevo ejercicio
         </h2>
 
-        {error && (
-          <p className="text-red-500 text-sm mb-2">{error}</p>
-        )}
+        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
 
         <form onSubmit={handleAdd} className="space-y-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-200"
+            >
               Nombre
             </label>
             <input
@@ -107,7 +118,10 @@ export default function TrainerExercises() {
           </div>
 
           <div>
-            <label htmlFor="url" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+            <label
+              htmlFor="url"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-200"
+            >
               URL del video
             </label>
             <input
@@ -135,7 +149,9 @@ export default function TrainerExercises() {
         {loading ? (
           <p className="text-gray-600 dark:text-gray-400">Cargando ejercicios…</p>
         ) : exercises.length === 0 ? (
-          <p className="text-gray-600 dark:text-gray-400">No hay ejercicios registrados aún.</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            No hay ejercicios registrados aún.
+          </p>
         ) : (
           <ul className="space-y-2">
             {exercises.map(ex => (
@@ -144,7 +160,9 @@ export default function TrainerExercises() {
                 className="flex items-center justify-between bg-gray-50 dark:bg-zinc-700 p-3 rounded hover:bg-gray-100 dark:hover:bg-zinc-600 transition-colors"
               >
                 <div>
-                  <p className="text-gray-800 dark:text-gray-100 font-medium">{ex.name}</p>
+                  <p className="text-gray-800 dark:text-gray-100 font-medium">
+                    {ex.name}
+                  </p>
                 </div>
                 <div className="flex items-center space-x-4">
                   <a
