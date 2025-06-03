@@ -22,21 +22,20 @@ export default function TrainerExercises() {
   const [name, setName] = useState('')
   const [url,  setUrl]  = useState('')
 
-  // 3) Prepara la URL base “completa” de tu backend
-  const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, '') || ''
+  // 3) Prepara la URL base “completa” de tu backend (sin slash final)
+  const BACKEND = (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/$/, '')
 
-  // 4) Al montar, cargamos los ejercicios desde el backend (URL absoluta)
+  // 4) Al montar, cargamos los ejercicios desde el endpoint absoluto:
   useEffect(() => {
     const fetchExercises = async () => {
       try {
         const resp = await axios.get<Exercise[]>(
-          `${BACKEND}/trainer/exercises/`,
+          `${BACKEND}/api/trainer/exercises/`,
           {
             headers: { 'Content-Type': 'application/json' },
             withCredentials: true,
-            // Si tienes que pasar un token, axios lo inyectará aquí si lo guardaste en localStorage:
+            // Si guardas token en localStorage y quieres enviarlo:
             // Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-            // pero si ya usas un interceptor en api.ts, aquí no es necesario.
           }
         )
         setExercises(resp.data)
@@ -63,16 +62,12 @@ export default function TrainerExercises() {
     try {
       const payload = { name: name.trim(), video_url: url.trim() }
       const resp = await axios.post<Exercise>(
-        `${BACKEND}/trainer/exercises/`,
+        `${BACKEND}/api/trainer/exercises/`,
         payload,
         {
           headers: { 'Content-Type': 'application/json' },
           withCredentials: true,
-          // si necesitas enviar Authorization, puedes añadirlo aquí:
-          // headers: {
-          //   'Content-Type': 'application/json',
-          //   Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-          // }
+          // Authorization: `Bearer ${localStorage.getItem('accessToken')}`
         }
       )
 
@@ -94,14 +89,11 @@ export default function TrainerExercises() {
 
     try {
       await axios.delete(
-        `${BACKEND}/trainer/exercises/${id}/`,
+        `${BACKEND}/api/trainer/exercises/${id}/`,
         {
           headers: { 'Content-Type': 'application/json' },
           withCredentials: true,
-          // headers: {
-          //   'Content-Type': 'application/json',
-          //   Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-          // }
+          // Authorization: `Bearer ${localStorage.getItem('accessToken')}`
         }
       )
       // Filtramos ese ejercicio del estado local
