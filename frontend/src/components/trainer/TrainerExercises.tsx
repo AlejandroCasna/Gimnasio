@@ -22,71 +22,28 @@ export default function TrainerExercises() {
   const [name, setName] = useState('')
   const [url,  setUrl]  = useState('')
 
-  // 3) En construccin, guardamos la “base” del BACKEND (sin slash final)
-  const BACKEND = (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/$/, '')
-
-  // 4) Ruta que usaremos finalmente (se inicializa vacía)
-  const [endpoint, setEndpoint] = useState<string>('')
-
-  // 5) Al montar, comprobamos cuál variante funciona:
+  // 3) Al montar, cargamos la lista desde "/api/trainer/exercises/"
   useEffect(() => {
-    const testEndpoint = async () => {
-      // 5a) Intento 1: BACKEND + "/trainer/exercises/"
-      try {
-        await axios.get(`${BACKEND}/trainer/exercises/`, {
-          headers: { 'Content-Type': 'application/json' },
-          withCredentials: true,
-        })
-        // si no lanza 404, esa es la URL correcta:
-        setEndpoint(`${BACKEND}/trainer/exercises/`)
-        return
-      } catch (err: any) {
-        if ((err as AxiosError).response?.status !== 404) {
-          console.error('Error distinto de 404 al probar /trainer/exercises/:', err)
-        }
-      }
-
-      // 5b) Intento 2: BACKEND + "/api/trainer/exercises/"
-      try {
-        await axios.get(`${BACKEND}/api/trainer/exercises/`, {
-          headers: { 'Content-Type': 'application/json' },
-          withCredentials: true,
-        })
-        setEndpoint(`${BACKEND}/api/trainer/exercises/`)
-        return
-      } catch (err: any) {
-        console.error('No se encontró /trainer/exercises/ ni /api/trainer/exercises/:', err)
-        setError('No se pudo localizar el endpoint de ejercicios en el backend.')
-      }
-    }
-
-    testEndpoint()
-      .finally(() => setLoading(false))
-  }, [BACKEND])
-
-  // 6) Una vez decidido “endpoint”, cargamos la lista real
-  useEffect(() => {
-    if (!endpoint) return
-
     const fetchExercises = async () => {
       setLoading(true)
       try {
-        const resp = await axios.get<Exercise[]>(endpoint, {
+        // LLAMO A "/api/trainer/exercises/" (Next.js redirige al backend real)
+        const resp = await axios.get<Exercise[]>('/api/trainer/exercises/', {
           headers: { 'Content-Type': 'application/json' },
           withCredentials: true,
         })
         setExercises(resp.data)
       } catch (err: any) {
-        console.error('Error al cargar ejercicios desde', endpoint, err)
+        console.error('Error al cargar ejercicios:', err)
         setError('No se pudo cargar la lista de ejercicios.')
       } finally {
         setLoading(false)
       }
     }
     fetchExercises()
-  }, [endpoint])
+  }, [])
 
-  // 7) Función para crear un nuevo ejercicio
+  // 4) Función para crear un nuevo ejercicio
   const handleAdd = async (e: FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -95,42 +52,44 @@ export default function TrainerExercises() {
       setError('El nombre y la URL no pueden estar vacíos.')
       return
     }
-    if (!endpoint) {
-      setError('Endpoint no inicializado todavía.')
-      return
-    }
 
     try {
       const payload = { name: name.trim(), video_url: url.trim() }
-      const resp = await axios.post<Exercise>(endpoint, payload, {
-        headers: { 'Content-Type': 'application/json' },
-        withCredentials: true,
-      })
+      // POST a "/api/trainer/exercises/"
+      const resp = await axios.post<Exercise>(
+        '/api/trainer/exercises/',
+        payload,
+        {
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true,
+        }
+      )
+      // Añadimos el ejercicio nuevo al estado local
       setExercises(prev => [...prev, resp.data])
       setName('')
       setUrl('')
     } catch (err: any) {
-      console.error('Error al crear ejercicio en', endpoint, err)
-      setError('No se pudo crear el ejercicio.')
+      console.error('Error al crear ejercicio:', err)
+      // Si el backend devuelve 404 o cualquier otro error:
+      const msg = (err as AxiosError).response?.data || 'No se pudo crear el ejercicio.'
+      setError(typeof msg === 'string' ? msg : 'No se pudo crear el ejercicio.')
     }
   }
 
-  // 8) Función para eliminar un ejercicio
+  // 5) Función para eliminar un ejercicio
   const handleDelete = async (id: number) => {
     if (!confirm('¿Seguro que quieres eliminar este ejercicio?')) return
-    if (!endpoint) {
-      setError('Endpoint no inicializado todavía.')
-      return
-    }
 
     try {
-      await axios.delete(`${endpoint}${id}/`, {
+      // DELETE a "/api/trainer/exercises/{id}/"
+      await axios.delete(`/api/trainer/exercises/${id}/`, {
         headers: { 'Content-Type': 'application/json' },
         withCredentials: true,
       })
+      // Lo quitamos del estado
       setExercises(prev => prev.filter(ex => ex.id !== id))
     } catch (err: any) {
-      console.error('Error al eliminar ejercicio', id, 'en', endpoint, err)
+      console.error('Error al eliminar ejercicio:', err)
       setError('No se pudo eliminar el ejercicio.')
     }
   }
@@ -185,7 +144,6 @@ export default function TrainerExercises() {
           <Button
             type="submit"
             className="bg-red-600 hover:bg-red-700 text-white"
-            disabled={!endpoint}
           >
             Añadir ejercicio
           </Button>
