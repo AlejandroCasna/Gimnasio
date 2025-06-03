@@ -30,7 +30,7 @@ export default function LoginForm({ onClose }: { onClose: () => void }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-2xl font-bold text-white text-center">Entrenar</h2>
+      <h2 className="text-2xl font-bold text-white text-center">Login</h2>
 
       <div>
         <label htmlFor="username" className="sr-only">
