@@ -27,11 +27,9 @@ export default function TrainerExercises() {
   useEffect(() => {
     const fetchExercises = async () => {
       try {
+        // <- Aquí apuntamos a /api/trainer/exercises/, no a /trainer/exercises/
         const resp = await axios.get<Exercise[]>(
-          // Aquí usamos la URL completa sin /api/ extra, porque tu endpoint real es:
-          //    https://eltemplo.pythonanywhere.com/trainer/exercises/
-          // y axios la resuelve correctamente. 
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/trainer/exercises/`
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/trainer/exercises/`
         )
         setExercises(resp.data)
       } catch (err: any) {
@@ -56,8 +54,8 @@ export default function TrainerExercises() {
 
     try {
       const payload = { name: name.trim(), video_url: url.trim() }
-      // Aquí usamos `api.post` porque `api.defaults.baseURL === NEXT_PUBLIC_BACKEND_URL + '/api/'`,
-      // así que api.post('/trainer/exercises/', …) va a:
+      // Como `api.baseURL === NEXT_PUBLIC_BACKEND_URL + '/api/'`,
+      // api.post('/trainer/exercises/', …) va a:
       //   https://eltemplo.pythonanywhere.com/api/trainer/exercises/
       const resp = await api.post<Exercise>('/trainer/exercises/', payload)
 
