@@ -1,5 +1,7 @@
 # backend/subscriptions/views.py
 
+
+from django.db.models.deletion import ProtectedError
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
@@ -158,9 +160,34 @@ class TrainerViewSet(viewsets.GenericViewSet):
 
 # 4) ViewSets separados para ejercicios reutilizables
 class ExerciseViewSet(viewsets.ModelViewSet):
-    queryset = Exercise.objects.all()
-    serializer_class = ExerciseSerializer
-    permission_classes = [permissions.IsAuthenticated, IsTrainer]
+     queryset = Exercise.objects.all()
+     serializer_class = ExerciseSerializer
+     permission_classes = [permissions.IsAuthenticated, IsTrainer]
+
+     def destroy(self, request, *args, **kwargs):
+        """
+        Override del borrado para capturar ProtectedError (cuando
+        hay RoutineExercise apuntando a este Exercise) y devolver 400 en lugar de 500.
+        """
+        instance = self.get_object()
+        try:
+            # Esto llama a perform_destroy(instance), que a su vez hace instance.delete()
+            self.perform_destroy(instance)
+        except ProtectedError:
+            # Si hay relaciones protegidas, devolvemos 400 con un detalle explicativo
+            return Response(
+                {"detail": "No se puede eliminar: este ejercicio está en uso en alguna rutina."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            # Cualquier otro error inesperado devolvemos 500 con un mensaje sencillo
+            return Response(
+                {"detail": f"Error interno al eliminar el ejercicio: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        # Si no hubo excepción, devolvemos 204 No Content
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class RoutineViewSet(viewsets.ModelViewSet):
     queryset = Routine.objects.all()
