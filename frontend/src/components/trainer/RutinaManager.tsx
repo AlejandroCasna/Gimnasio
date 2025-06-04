@@ -85,7 +85,7 @@ export default function RutinaManager({ onSaved }: RutinaManagerProps) {
         day_of_week: it.day_of_week,
         reps_range: it.reps_range,
         order: it.order,
-        // Si quisieras hacer PUT vs POST, podrías enviar “id: it.id” cuando exista
+        // Si existiera “it.id”, podrías enviarlo para distinguir PUT vs POST
       })),
     }
 
@@ -111,7 +111,7 @@ export default function RutinaManager({ onSaved }: RutinaManagerProps) {
         Crear / Editar Rutina
       </h2>
 
-      {/* 1) Selector de cliente */}
+      {/** 1) Selector de cliente **/}
       <UICombobox
         options={clients.map(c => ({ id: c.id, name: c.username }))}
         value={
@@ -127,7 +127,7 @@ export default function RutinaManager({ onSaved }: RutinaManagerProps) {
         allowNew={false}
       />
 
-      {/* 2) Nombre de la rutina y semana */}
+      {/** 2) Nombre de la rutina y semana **/}
       <div className="flex gap-4">
         <input
           className="flex-1 rounded bg-zinc-800 p-2 text-white"
@@ -145,37 +145,27 @@ export default function RutinaManager({ onSaved }: RutinaManagerProps) {
         />
       </div>
 
-      {/* 3) Ejercicios por día */}
+      {/** 3) Ejercicios por día **/}
       {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(
         (label, idx) => (
           <div
             key={idx}
-            className="bg-zinc-800 p-4 rounded space-y-2"
+            className="bg-zinc-800 p-4 rounded space-y-4"
           >
-            {/* Encabezado con el nombre del día */}
-            <h3 className="mb-2 font-semibold text-white">{label}</h3>
+            {/* Nombre del día */}
+            <h3 className="mb-2 font-semibold text-white">
+              {label}
+            </h3>
 
-            {/*
-              Agregamos UNA sola fila de encabezados que se alineará
-              con cada input que aparece a continuación:
-            */}
-            <div className="flex gap-2 mb-1 text-sm text-gray-300">
-              {/* Ancho libre para el Combobox del ejercicio */}
-              <span className="flex-1">Ejercicio</span>
-              {/* Ancho fijo igual a los inputs de “Reps” */}
-              <span className="w-24 text-center">
-                Repeticiones
-              </span>
-              {/* Ancho fijo igual al input de “Sets/Orden” */}
-              <span className="w-16 text-center">Series</span>
-              {/* Columna vacía para el botón eliminar */}
-              <span className="w-8">&nbsp;</span>
+            {/** — Asegúrate de que esta fila de “encabezados” quede justo ANTES de map(…) — **/}
+            <div className="flex gap-2 mb-2 text-sm text-gray-300">
+              <div className="flex-1">Ejercicio</div>
+              <div className="w-24 text-center">Repeticiones</div>
+              <div className="w-16 text-center">Series</div>
+              <div className="w-8">&nbsp;</div>
             </div>
 
-            {/*
-              Ahora recorremos los “items” que correspondan a este día:
-              filtramos por day_of_week === idx + 1
-            */}
+            {/** — Ahora listamos los items correspondientes a este día — **/}
             {items
               .filter(it => it.day_of_week === idx + 1)
               .sort((a, b) => a.order - b.order)
@@ -184,7 +174,7 @@ export default function RutinaManager({ onSaved }: RutinaManagerProps) {
                   key={i}
                   className="flex gap-2 items-center"
                 >
-                  {/* 1) Combobox para seleccionar ejercicio */}
+                  {/** 1) Combobox para seleccionar ejercicio **/}
                   <UICombobox
                     options={exercises.map(ex => ({
                       id: ex.id!,
@@ -208,7 +198,7 @@ export default function RutinaManager({ onSaved }: RutinaManagerProps) {
                     allowNew={false}
                   />
 
-                  {/* 2) Input “Reps” (reps_range) */}
+                  {/** 2) Input “Reps” (reps_range) **/}
                   <input
                     className="w-24 rounded bg-zinc-700 p-2 text-white text-center"
                     type="text"
@@ -220,7 +210,7 @@ export default function RutinaManager({ onSaved }: RutinaManagerProps) {
                     }}
                   />
 
-                  {/* 3) Input “Sets” (order) */}
+                  {/** 3) Input “Sets” (order) **/}
                   <input
                     className="w-16 rounded bg-zinc-700 p-2 text-white text-center"
                     type="number"
@@ -232,7 +222,7 @@ export default function RutinaManager({ onSaved }: RutinaManagerProps) {
                     }}
                   />
 
-                  {/* 4) Botón para eliminar este ejercicio */}
+                  {/** 4) Botón para eliminar este ejercicio **/}
                   <button
                     type="button"
                     onClick={() => removeItem(it)}
@@ -244,7 +234,7 @@ export default function RutinaManager({ onSaved }: RutinaManagerProps) {
                 </div>
               ))}
 
-            {/* Botón “+ Añadir ejercicio” para este día */}
+            {/** 5) Botón “+ Añadir ejercicio” para este día **/}
             <Button
               size="sm"
               variant="secondary"
@@ -256,7 +246,7 @@ export default function RutinaManager({ onSaved }: RutinaManagerProps) {
         )
       )}
 
-      {/* Botón para guardar toda la rutina */}
+      {/** 4) Botón para guardar toda la rutina **/}
       <div className="text-right">
         <Button onClick={saveRoutine}>Guardar rutina</Button>
       </div>
