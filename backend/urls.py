@@ -15,7 +15,7 @@ from subscriptions.views import (
     my_routine,
     TrainerListViewSet,
     TrainerViewSet,
-    ExerciseViewSet     as SubExerciseViewSet,
+    ExerciseViewSet,
     RoutineViewSet      as SubRoutineViewSet,
 )
 from chat.views import ChatThreadViewSet, MessageViewSet
@@ -25,8 +25,8 @@ router = DefaultRouter()
 # — Usuarios & perfil —
 router.register(r'trainers',    TrainerListViewSet,   basename='trainers')     # listado público de trainers (con username)
 router.register(r'trainer',     TrainerViewSet,       basename='trainer')      # gestión de clientes/rutinas (solo trainer)
-router.register(r'exercises',   SubExerciseViewSet,   basename='exercises')    # ejercicios (solo trainer)
 router.register(r'routines',    SubRoutineViewSet,    basename='routines')     # rutinas (solo trainer)
+router.register(r'exercises', ExerciseViewSet, basename='exercises')    # ejercicios (solo trainer)
 router.register(r'running-plans', RunningPlanViewSet, basename='runningplan')
 router.register(r'trainer/running-plans', RunningPlanViewSet, basename='runningplans')
 
