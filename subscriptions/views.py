@@ -160,33 +160,40 @@ class TrainerViewSet(viewsets.GenericViewSet):
 
 # 4) ViewSets separados para ejercicios reutilizables
 class ExerciseViewSet(viewsets.ModelViewSet):
-     queryset = Exercise.objects.all()
-     serializer_class = ExerciseSerializer
-     permission_classes = [permissions.IsAuthenticated, IsTrainer]
+    """
+    ViewSet para que el Trainer gestione ejercicios.
+    Override de destroy() para que, antes de llamar a delete() en Exercise,
+    elimine todas las filas de RoutineExercise que apunten a este Exercise.
+    """
 
-     def destroy(self, request, *args, **kwargs):
-        """
-        Override del borrado para capturar ProtectedError (cuando
-        hay RoutineExercise apuntando a este Exercise) y devolver 400 en lugar de 500.
-        """
+    queryset = Exercise.objects.all()
+    serializer_class = ExerciseSerializer
+    permission_classes = [permissions.IsAuthenticated, IsTrainer]
+
+    def destroy(self, request, *args, **kwargs):
+  
         instance = self.get_object()
-        try:
-            # Esto llama a perform_destroy(instance), que a su vez hace instance.delete()
-            self.perform_destroy(instance)
-        except ProtectedError:
-            # Si hay relaciones protegidas, devolvemos 400 con un detalle explicativo
-            return Response(
-                {"detail": "No se puede eliminar: este ejercicio está en uso en alguna rutina."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        except Exception as e:
-            # Cualquier otro error inesperado devolvemos 500 con un mensaje sencillo
-            return Response(
-                {"detail": f"Error interno al eliminar el ejercicio: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
 
-        # Si no hubo excepción, devolvemos 204 No Content
+        with transaction.atomic():
+            instance.routineexercise_set.all().delete()
+
+            try:
+ 
+                self.perform_destroy(instance)
+            except ProtectedError:
+
+                return Response(
+                    {"detail": "No se puede eliminar: este ejercicio está en uso en alguna rutina."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+ 
+                return Response(
+                    {"detail": f"Error interno al eliminar el ejercicio: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
+        # 5) Si todo salió bien, devolvemos 204 No Content
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class RoutineViewSet(viewsets.ModelViewSet):
