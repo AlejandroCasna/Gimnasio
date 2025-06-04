@@ -1,6 +1,6 @@
 # backend/subscriptions/views.py
 
-
+from django.db import transaction  
 from django.db.models.deletion import ProtectedError
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.tokens import default_token_generator
