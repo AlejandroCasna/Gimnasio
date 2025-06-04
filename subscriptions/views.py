@@ -168,41 +168,65 @@ class ExerciseViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsTrainer]
 
     def destroy(self, request, *args, **kwargs):
-        # 1) Obtener la instancia concreta de Exercise que queremos eliminar
+        """
+        Override de destroy() para:
+        1) Borrar primero todas las filas de RoutineExercise que referencian a este Exercise.
+        2) Intentar borrar el Exercise en sí dentro de una transacción atómica.
+        3) Capturar ProtectedError (si por algún motivo aún queda FK protegida).
+        4) Capturar cualquier otro error y volcar el traceback en los logs.
+        """
         instance = self.get_object()
 
         try:
-            # 2) Abrimos una transacción atómica
             with transaction.atomic():
-                # 3) Eliminar expedítamente todas las filas de RoutineExercise que hacían FK a este Exercise
+                # 1) Eliminar explícitamente todas las relaciones en RoutineExercise:
                 RoutineExercise.objects.filter(exercise=instance).delete()
 
-                # 4) Intentar borrar el Exercise en sí
-                #    (perform_destroy llama a instance.delete())
+                # 2) Intentar borrar el Exercise:
+                #    perform_destroy internamente hace instance.delete()
                 self.perform_destroy(instance)
 
         except ProtectedError:
-            # Si aún hay dependencias PROTECTED (p. ej. otra tabla con on_delete=PROTECT),
-            # devolvemos status 400 y mensaje explicativo.
+            # Si por alguna razón sigue habiendo relaciones protegidas (on_delete=PROTECT),
+            # devolvemos un 400 con mensaje legible para el frontend.
             return Response(
                 {"detail": "No se puede eliminar: este ejercicio está en uso en alguna rutina."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         except Exception as e:
-            # Cualquier otro error inesperado:
-            # 1) Imprime el stack trace completo en los logs de PythonAnywhere
+            # Vuelca el traceback en los logs de PythonAnywhere para que puedas depurar
             import traceback
             traceback.print_exc()
 
-            # 2) Devuelve un JSON con status 500 para que el frontend muestre el mensaje
+            # Devolvemos un 500 con mensaje genérico al cliente JS
             return Response(
                 {"detail": f"Error interno al eliminar el ejercicio: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-        # Si todo fue OK:
+        # Si no hubo excepción, devolvemos 204 No Content
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        """
+        Por seguridad, también sobreescribimos perform_destroy() para asegurarnos
+        de que, aunque por alguna razón no se invoque destroy(), cualquier borrado
+        pase por este método (p. ej. si algún otro código llamara a perform_destroy()).
+        """
+        try:
+            # (Repetimos la misma lógica de borrar relaciones, por si acaso)
+            RoutineExercise.objects.filter(exercise=instance).delete()
+            super().perform_destroy(instance)
+        except ProtectedError:
+            # Si aquí surge un ProtectedError, lo re-lanzamos para que el método destroy lo capture.
+            raise
+        except Exception as e:
+            # Si llega aquí, agrégalo al log para no “tragarte” silenciosamente el error.
+            import traceback
+            traceback.print_exc()
+            # Volvemos a lanzar para que destroy() lo capture como excepción global.
+            raise
     
 class RoutineViewSet(viewsets.ModelViewSet):
     queryset = Routine.objects.all()
