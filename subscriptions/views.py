@@ -160,39 +160,38 @@ class TrainerViewSet(viewsets.GenericViewSet):
 class ExerciseViewSet(viewsets.ModelViewSet):
     """
     ViewSet para que el Trainer gestione ejercicios.
-    Override de destroy() para que, antes de eliminar el Exercise,
-    borre todas las filas de RoutineExercise que apuntan a él.
+    Al eliminar un Exercise, primero elimina TODOS los RoutineExercise que lo referencian,
+    y luego borra el propio Exercise. Captura ProtectedError y otros errores inesperados.
     """
     queryset = Exercise.objects.all()
     serializer_class = ExerciseSerializer
     permission_classes = [permissions.IsAuthenticated, IsTrainer]
 
     def destroy(self, request, *args, **kwargs):
-        # 1) Obtener la instancia de Exercise a eliminar
+
         instance = self.get_object()
 
-        # 2) Abrir una transacción atómica
+
         with transaction.atomic():
             try:
-                # 3) Eliminar primero las filas intermedias de RoutineExercise
                 RoutineExercise.objects.filter(exercise=instance).delete()
 
-                # 4) Intentar borrar el propio Exercise
+                
                 self.perform_destroy(instance)
+
             except ProtectedError:
-                # Si aún hay dependencias (algo no borrable), devolvemos 400
+                
                 return Response(
                     {"detail": "No se puede eliminar: este ejercicio está en uso en alguna rutina."},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             except Exception as e:
-                # Cualquier otro error imprevisto: devolvemos 500 con detalle
+                
                 return Response(
                     {"detail": f"Error interno al eliminar el ejercicio: {str(e)}"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
 
-        # 5) Si todo salió bien, devolvemos 204 No Content
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 class RoutineViewSet(viewsets.ModelViewSet):
