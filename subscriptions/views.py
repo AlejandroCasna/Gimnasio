@@ -11,15 +11,12 @@ from django.utils.http import urlsafe_base64_encode
 from rest_framework import permissions, viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
-from .models import Profile, Exercise, Routine 
+from .models import Profile, Exercise, Routine, RoutineExercise , RunningPlan ,Payment
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.serializers import ModelSerializer
 import json
-from .models import RunningPlan
-from .serializers import RunningPlanSerializer
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse, HttpResponseBadRequest
-from .models import Payment
+
 
 from .serializers import (
     ClientSerializer,
@@ -27,6 +24,7 @@ from .serializers import (
     ExerciseSerializer,
     RoutineSerializer,
     SimpleUserSerializer,
+    RunningPlanSerializer,
     
 )
 
@@ -199,7 +197,7 @@ class ExerciseViewSet(viewsets.ModelViewSet):
 
         # 5) Si todo salió bien, devolvemos 204 No Content
         return Response(status=status.HTTP_204_NO_CONTENT)
-
+    
 class RoutineViewSet(viewsets.ModelViewSet):
     queryset = Routine.objects.all()
     serializer_class = RoutineSerializer
