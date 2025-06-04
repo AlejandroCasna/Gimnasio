@@ -1,3 +1,4 @@
+// frontend/src/components/RutinaManager.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -36,7 +37,8 @@ export default function RutinaManager({ onSaved }: RutinaManagerProps) {
   // precarga rutina si ya existe para ese cliente+semana
   useEffect(() => {
     if (!selectedClient) return
-    api.get<Routine[]>(`/trainer/${selectedClient.id}/routines/`)
+    api
+      .get<Routine[]>(`/trainer/${selectedClient.id}/routines/`)
       .then(r => {
         const found = r.data.find(x => x.week_number === weekNumber)
         if (found) {
@@ -50,6 +52,7 @@ export default function RutinaManager({ onSaved }: RutinaManagerProps) {
       .catch(console.error)
   }, [selectedClient, weekNumber])
 
+  // — Función para añadir un ejercicio vacío a un día concreto —
   function addEmptyItem(day_of_week: number) {
     setItems(prev => [
       ...prev,
@@ -58,46 +61,55 @@ export default function RutinaManager({ onSaved }: RutinaManagerProps) {
         exercise: { id: undefined, name: '', video_url: '' } as Exercise,
         day_of_week,
         reps_range: '',
-        order: prev.filter(it => it.day_of_week === day_of_week).length + 1,
-      },
+        order:
+          prev.filter(it => it.day_of_week === day_of_week).length + 1,
+      } as RoutineExercise,
     ])
   }
 
+  // — Función para eliminar un ejercicio del arreglo “items” —
+  function removeItem(itemToRemove: RoutineExercise) {
+    setItems(prev => prev.filter(it => it !== itemToRemove))
+  }
+
+  // — Guarda la rutina en el backend —
   async function saveRoutine() {
-    if (!selectedClient) return;
-  
-    // Construimos el payload usando exercise_id en lugar del objeto entero
+    if (!selectedClient) return
+
+    // Construimos el payload usando “exercise_id” en lugar del objeto completo
     const payload = {
-      name:        routineName,
+      name: routineName,
       week_number: weekNumber,
       items: items.map(it => ({
-        exercise_id: it.exercise.id,   // 🚩 clave foránea
+        exercise_id: it.exercise.id, // 🚩 aquí va la FK
         day_of_week: it.day_of_week,
-        reps_range:  it.reps_range,
-        order:       it.order,
+        reps_range: it.reps_range,
+        order: it.order,
+        // Si quisieras hacer PUT vs POST, podrías enviar “id: it.id” cuando exista
       })),
-    };
-  
+    }
+
     try {
       await api.post(
         `/trainer/${selectedClient.id}/routines/`,
         payload
-      );
-      alert('Rutina guardada correctamente');
-      // Disparamos el callback si nos lo pasaron
-      onSaved?.();
+      )
+      alert('Rutina guardada correctamente')
+      onSaved?.()
     } catch (err: any) {
-      console.error(err.response?.data);
+      console.error(err.response?.data)
       alert(
         'No se pudo guardar la rutina:\n' +
-        JSON.stringify(err.response?.data, null, 2)
-      );
+          JSON.stringify(err.response?.data, null, 2)
+      )
     }
   }
 
   return (
     <div className="space-y-6 p-6 bg-zinc-900 rounded max-w-3xl mx-auto">
-      <h2 className="text-2xl font-bold text-white">Crear / Editar Rutina</h2>
+      <h2 className="text-2xl font-bold text-white">
+        Crear / Editar Rutina
+      </h2>
 
       {/* 1) Selector de cliente */}
       <UICombobox
@@ -115,7 +127,7 @@ export default function RutinaManager({ onSaved }: RutinaManagerProps) {
         allowNew={false}
       />
 
-      {/* 2) Nombre y semana */}
+      {/* 2) Nombre de la rutina y semana */}
       <div className="flex gap-4">
         <input
           className="flex-1 rounded bg-zinc-800 p-2 text-white"
@@ -134,57 +146,117 @@ export default function RutinaManager({ onSaved }: RutinaManagerProps) {
       </div>
 
       {/* 3) Ejercicios por día */}
-      {['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].map((label, idx) => (
-        <div key={idx} className="bg-zinc-800 p-4 rounded">
-          <h3 className="mb-2 font-semibold text-white">{label}</h3>
-          {items
-            .filter(it => it.day_of_week === idx + 1)
-            .sort((a, b) => a.order - b.order)
-            .map((it, i) => (
-              <div key={i} className="mb-2 flex gap-2">
-                <UICombobox
-                  options={exercises.map(ex => ({ id: ex.id!, name: ex.name }))}
-                  value={{ id: it.exercise.id!, name: it.exercise.name }}
-                  onChange={opt => {
-                    if (opt) {
-                      it.exercise = { id: opt.id, name: opt.name, video_url: '' };
-                      setItems([...items]);
-                    }
-                  }}
-                  placeholder="Ejercicio…"
-                  allowNew={false}     // ← ya no permitimos crear uno nuevo aquí
-                />
-                <input
-                  className="w-24 rounded bg-zinc-700 p-2 text-white"
-                  type="text"
-                  placeholder="Reps"
-                  value={it.reps_range}
-                  onChange={e => {
-                    it.reps_range = e.target.value
-                    setItems([...items])
-                  }}
-                />
-                <input
-                  className="w-16 rounded bg-zinc-700 p-2 text-white"
-                  type="number"
-                  value={it.order}
-                  onChange={e => {
-                    it.order = Number(e.target.value)
-                    setItems([...items])
-                  }}
-                />
-              </div>
-            ))}
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={() => addEmptyItem(idx + 1)}
+      {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(
+        (label, idx) => (
+          <div
+            key={idx}
+            className="bg-zinc-800 p-4 rounded space-y-2"
           >
-            + Añadir ejercicio
-          </Button>
-        </div>
-      ))}
+            {/* Encabezado con el nombre del día */}
+            <h3 className="mb-2 font-semibold text-white">{label}</h3>
 
+            {/*
+              Agregamos UNA sola fila de encabezados que se alineará
+              con cada input que aparece a continuación:
+            */}
+            <div className="flex gap-2 mb-1 text-sm text-gray-300">
+              {/* Ancho libre para el Combobox del ejercicio */}
+              <span className="flex-1">Ejercicio</span>
+              {/* Ancho fijo igual a los inputs de “Reps” */}
+              <span className="w-24 text-center">
+                Repeticiones
+              </span>
+              {/* Ancho fijo igual al input de “Sets/Orden” */}
+              <span className="w-16 text-center">Series</span>
+              {/* Columna vacía para el botón eliminar */}
+              <span className="w-8">&nbsp;</span>
+            </div>
+
+            {/*
+              Ahora recorremos los “items” que correspondan a este día:
+              filtramos por day_of_week === idx + 1
+            */}
+            {items
+              .filter(it => it.day_of_week === idx + 1)
+              .sort((a, b) => a.order - b.order)
+              .map((it, i) => (
+                <div
+                  key={i}
+                  className="flex gap-2 items-center"
+                >
+                  {/* 1) Combobox para seleccionar ejercicio */}
+                  <UICombobox
+                    options={exercises.map(ex => ({
+                      id: ex.id!,
+                      name: ex.name,
+                    }))}
+                    value={{
+                      id: it.exercise.id!,
+                      name: it.exercise.name,
+                    }}
+                    onChange={opt => {
+                      if (opt) {
+                        it.exercise = {
+                          id: opt.id,
+                          name: opt.name,
+                          video_url: '',
+                        }
+                        setItems([...items])
+                      }
+                    }}
+                    placeholder="Ejercicio…"
+                    allowNew={false}
+                  />
+
+                  {/* 2) Input “Reps” (reps_range) */}
+                  <input
+                    className="w-24 rounded bg-zinc-700 p-2 text-white text-center"
+                    type="text"
+                    placeholder="10-12"
+                    value={it.reps_range}
+                    onChange={e => {
+                      it.reps_range = e.target.value
+                      setItems([...items])
+                    }}
+                  />
+
+                  {/* 3) Input “Sets” (order) */}
+                  <input
+                    className="w-16 rounded bg-zinc-700 p-2 text-white text-center"
+                    type="number"
+                    min={1}
+                    value={it.order}
+                    onChange={e => {
+                      it.order = Number(e.target.value)
+                      setItems([...items])
+                    }}
+                  />
+
+                  {/* 4) Botón para eliminar este ejercicio */}
+                  <button
+                    type="button"
+                    onClick={() => removeItem(it)}
+                    className="w-8 text-red-500 hover:text-red-700"
+                    title="Eliminar ejercicio"
+                  >
+                    🗑
+                  </button>
+                </div>
+              ))}
+
+            {/* Botón “+ Añadir ejercicio” para este día */}
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => addEmptyItem(idx + 1)}
+            >
+              + Añadir ejercicio
+            </Button>
+          </div>
+        )
+      )}
+
+      {/* Botón para guardar toda la rutina */}
       <div className="text-right">
         <Button onClick={saveRoutine}>Guardar rutina</Button>
       </div>
