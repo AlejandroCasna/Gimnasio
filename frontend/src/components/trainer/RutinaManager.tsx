@@ -69,6 +69,7 @@ export default function RutinaManager({ onSaved }: RutinaManagerProps) {
 
     // Construimos el payload usando exercise_id en lugar del objeto entero
     const payload = {
+      client:      selectedClient.id,
       name:        routineName,
       week_number: weekNumber,
       items: items.map(it => ({
