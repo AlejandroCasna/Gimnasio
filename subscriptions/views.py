@@ -171,23 +171,27 @@ class ExerciseViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsTrainer]
 
     def destroy(self, request, *args, **kwargs):
-  
+        # 1) Obtener la instancia de Exercise a eliminar
         instance = self.get_object()
 
+        # 2) Abrir una transacción atómica para que todo se revierta si algo falla
         with transaction.atomic():
-            instance.routineexercise_set.all().delete()
+            # 3) Borrar explícitamente las filas intermedias de RoutineExercise
+            #    que apuntan a este Exercise.
+            RoutineExercise.objects.filter(exercise=instance).delete()
 
+            # 4) Ahora intentar borrar el propio Exercise
             try:
- 
+                # perform_destroy() hace internamente instance.delete()
                 self.perform_destroy(instance)
             except ProtectedError:
-
+                # Si, por alguna razón, aún hay dependencias protegidas
                 return Response(
                     {"detail": "No se puede eliminar: este ejercicio está en uso en alguna rutina."},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             except Exception as e:
- 
+                # Cualquier otro error imprevisto devolvemos 500
                 return Response(
                     {"detail": f"Error interno al eliminar el ejercicio: {str(e)}"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
