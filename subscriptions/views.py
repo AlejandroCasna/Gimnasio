@@ -168,30 +168,40 @@ class ExerciseViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsTrainer]
 
     def destroy(self, request, *args, **kwargs):
-
+        # 1) Obtener la instancia concreta de Exercise que queremos eliminar
         instance = self.get_object()
 
-
-        with transaction.atomic():
-            try:
+        try:
+            # 2) Abrimos una transacción atómica
+            with transaction.atomic():
+                # 3) Eliminar expedítamente todas las filas de RoutineExercise que hacían FK a este Exercise
                 RoutineExercise.objects.filter(exercise=instance).delete()
 
-                
+                # 4) Intentar borrar el Exercise en sí
+                #    (perform_destroy llama a instance.delete())
                 self.perform_destroy(instance)
 
-            except ProtectedError:
-                
-                return Response(
-                    {"detail": "No se puede eliminar: este ejercicio está en uso en alguna rutina."},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            except Exception as e:
-                
-                return Response(
-                    {"detail": f"Error interno al eliminar el ejercicio: {str(e)}"},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+        except ProtectedError:
+            # Si aún hay dependencias PROTECTED (p. ej. otra tabla con on_delete=PROTECT),
+            # devolvemos status 400 y mensaje explicativo.
+            return Response(
+                {"detail": "No se puede eliminar: este ejercicio está en uso en alguna rutina."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
+        except Exception as e:
+            # Cualquier otro error inesperado:
+            # 1) Imprime el stack trace completo en los logs de PythonAnywhere
+            import traceback
+            traceback.print_exc()
+
+            # 2) Devuelve un JSON con status 500 para que el frontend muestre el mensaje
+            return Response(
+                {"detail": f"Error interno al eliminar el ejercicio: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        # Si todo fue OK:
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 class RoutineViewSet(viewsets.ModelViewSet):
