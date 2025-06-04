@@ -160,10 +160,9 @@ class TrainerViewSet(viewsets.GenericViewSet):
 class ExerciseViewSet(viewsets.ModelViewSet):
     """
     ViewSet para que el Trainer gestione ejercicios.
-    Override de destroy() para que, antes de llamar a delete() en Exercise,
-    elimine todas las filas de RoutineExercise que apunten a este Exercise.
+    Override de destroy() para que, antes de eliminar el Exercise,
+    borre todas las filas de RoutineExercise que apuntan a él.
     """
-
     queryset = Exercise.objects.all()
     serializer_class = ExerciseSerializer
     permission_classes = [permissions.IsAuthenticated, IsTrainer]
@@ -172,24 +171,22 @@ class ExerciseViewSet(viewsets.ModelViewSet):
         # 1) Obtener la instancia de Exercise a eliminar
         instance = self.get_object()
 
-        # 2) Abrir una transacción atómica para que todo se revierta si algo falla
+        # 2) Abrir una transacción atómica
         with transaction.atomic():
-            # 3) Borrar explícitamente las filas intermedias de RoutineExercise
-            #    que apuntan a este Exercise.
-            RoutineExercise.objects.filter(exercise=instance).delete()
-
-            # 4) Ahora intentar borrar el propio Exercise
             try:
-                # perform_destroy() hace internamente instance.delete()
+                # 3) Eliminar primero las filas intermedias de RoutineExercise
+                RoutineExercise.objects.filter(exercise=instance).delete()
+
+                # 4) Intentar borrar el propio Exercise
                 self.perform_destroy(instance)
             except ProtectedError:
-                # Si, por alguna razón, aún hay dependencias protegidas
+                # Si aún hay dependencias (algo no borrable), devolvemos 400
                 return Response(
                     {"detail": "No se puede eliminar: este ejercicio está en uso en alguna rutina."},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             except Exception as e:
-                # Cualquier otro error imprevisto devolvemos 500
+                # Cualquier otro error imprevisto: devolvemos 500 con detalle
                 return Response(
                     {"detail": f"Error interno al eliminar el ejercicio: {str(e)}"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
