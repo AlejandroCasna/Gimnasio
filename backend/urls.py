@@ -56,6 +56,7 @@ urlpatterns = [
     path('api/me/',         me,         name='user-me'),
     path('api/my-routine/', my_routine, name='my-routine'),
     path('api/', include('subscriptions.urls')),
+    path('api/', include('django.contrib.auth.urls')),
     
     # — TODO el resto del router DRF bajo /api/ —
     path('api/', include(router.urls)),

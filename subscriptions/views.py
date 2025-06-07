@@ -16,6 +16,7 @@ from rest_framework.permissions import IsAuthenticated
 import json
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse, HttpResponseBadRequest
+from django.contrib.auth.forms import PasswordResetForm
 
 
 from .serializers import (
@@ -102,22 +103,20 @@ class TrainerViewSet(viewsets.GenericViewSet):
         profile.phone = data['phone']
         profile.save()
 
-        # grupo Clients
+        # añade al grupo Clients
         grp, _ = Group.objects.get_or_create(name='Clients')
         user.groups.add(grp)
 
-        # envía email de set-password
-        uid   = urlsafe_base64_encode(force_bytes(user.pk))
-        token = default_token_generator.make_token(user)
-        url = request.build_absolute_uri(
-            reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
-        )
-        send_mail(
-            'Configura tu contraseña – El Bajo Entrena',
-            f'¡Bienvenido! Para crear tu contraseña: {url}',
-            'no-reply@elbajoentrena.com',
-            [user.email],
-        )
+        # envía email de set-password usando el form oficial
+        reset_form = PasswordResetForm({'email': user.email})
+        if reset_form.is_valid():
+            reset_form.save(
+                request=request,
+                use_https=request.is_secure(),
+                from_email='El Bajo Entrena <no-reply@elbajoentrena.com>',
+                subject_template_name='registration/password_reset_subject.txt',
+                email_template_name='registration/password_reset_email.html',
+            )
 
         return Response(ser.data, status=status.HTTP_201_CREATED)
 

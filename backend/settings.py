@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 import environ
 from corsheaders.defaults import default_headers
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 1. CARGA DE .env
 # ─────────────────────────────────────────────────────────────────────────────
@@ -67,7 +68,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],            # aquí podrías añadir alguna carpeta extra de “templates”
+        "DIRS": [BASE_DIR / 'templates'],            
         "APP_DIRS": True,      # esto le dice a Django que busque dentro de cada app
         "OPTIONS": {
             "context_processors": [
@@ -149,7 +150,23 @@ SIMPLE_JWT = {
   'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'in-v3.mailjet.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER     = env('MAILJET_APIKEY_PUBLIC')
+EMAIL_HOST_PASSWORD = env('MAILJET_APIKEY_PRIVATE')
+
+DEFAULT_FROM_EMAIL = 'El Bajo Entrena <szyrkoyoel@gmail.com>'
+
+
+
+
+
+
+
 
 APPEND_SLASH = False
 
