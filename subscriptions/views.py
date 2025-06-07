@@ -11,12 +11,19 @@ from django.utils.http import urlsafe_base64_encode
 from rest_framework import permissions, viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
+
+from backend import settings
 from .models import Profile, Exercise, Routine, RoutineExercise , RunningPlan ,Payment
 from rest_framework.permissions import IsAuthenticated
 import json
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.contrib.auth.forms import PasswordResetForm
+
+from django.conf import settings
+from django.template.loader import render_to_string
+from mailjet_rest import Client
+import logging
 
 
 from .serializers import (
@@ -28,6 +35,10 @@ from .serializers import (
     RunningPlanSerializer,
     
 )
+
+
+logger = logging.getLogger(__name__)
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -81,6 +92,8 @@ class TrainerViewSet(viewsets.GenericViewSet):
         ser = ClientSerializer(clients, many=True)
         return Response(ser.data)
 
+
+
     @action(detail=False, methods=['post'], url_path='create-client')
     def create_client(self, request):
         ser = ClientSerializer(data=request.data)
@@ -107,15 +120,53 @@ class TrainerViewSet(viewsets.GenericViewSet):
         grp, _ = Group.objects.get_or_create(name='Clients')
         user.groups.add(grp)
 
-        # envía email de set-password usando el form oficial
-        reset_form = PasswordResetForm({'email': user.email})
-        if reset_form.is_valid():
-            reset_form.save(
-                request=request,
-                use_https=request.is_secure(),
-                from_email='El Bajo Entrena <no-reply@elbajoentrena.com>',
-                subject_template_name='registration/password_reset_subject.txt',
-                email_template_name='registration/password_reset_email.html',
+        # Genera UID y token para el enlace de creación de contraseña
+        uid   = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        url   = request.build_absolute_uri(
+            reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+        )
+
+        # Renderiza la plantilla de email con contexto
+        html_content = render_to_string('registration/password_reset_email.html', {
+            'user': user,
+            'protocol': request.scheme,
+            'domain': request.get_host(),
+            'uid': uid,
+            'token': token,
+            'url': url,
+        })
+
+        # Configura y envía vía Mailjet REST API
+        mailjet = Client(auth=(
+            settings.EMAIL_HOST_USER,
+            settings.EMAIL_HOST_PASSWORD
+        ), version='v3.1')
+
+        data_mail = {
+            'Messages': [
+                {
+                    'From': {
+                        'Email': 'bajoentrena@gmail.com',
+                        'Name':  'El Bajo Entrena'
+                    },
+                    'To': [
+                        {'Email': user.email, 'Name': user.first_name}
+                    ],
+                    'Subject': 'Configura tu contraseña en El Bajo Entrena',
+                    'HTMLPart': html_content
+                }
+            ]
+        }
+
+        result = mailjet.send.create(data=data_mail)
+        if result.status_code == 200:
+            logger.info("Mailjet REST API: email enviado correctamente a %s", user.email)
+        else:
+            logger.error(
+                "Mailjet REST API error %s: %s",
+                result.status_code,
+                result.json()
             )
 
         return Response(ser.data, status=status.HTTP_201_CREATED)
