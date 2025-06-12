@@ -46,7 +46,7 @@ export default function Dashboard() {
 
       {/* Si sigues necesitando el carrusel de noticias, mantenlo aquí. */}
       {/* Si ya no usas NewsCarousel, puedes eliminar todo esto. */}
-      <div className="w-full bg-zinc-900 py-8">
+      <div className="w-full py-8">
         <h3 className="text-xl font-semibold text-white mb-4 text-center">
           Noticias del día
         </h3>
