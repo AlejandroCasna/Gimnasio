@@ -136,6 +136,12 @@ export default function MamushkaNav() {
   const current = stack[stack.length - 1]
 
   function push(node: Node) {
+// 1) Si tiene url: abrir WhatsApp
+    if (node.url) {
+      window.open(node.url, '_blank')
+      return
+    }
+
     // 1) Pago:
     if (node.qrKey) {
       const amount = PRICE_MAP[node.qrKey]!
