@@ -147,7 +147,7 @@ class TrainerViewSet(viewsets.GenericViewSet):
             'Messages': [
                 {
                     'From': {
-                        'Email': 'bajoentrena@gmail.com',
+                        'Email': 'no-reply@elbajoentrena.com',
                         'Name':  'El Bajo Entrena'
                     },
                     'To': [
