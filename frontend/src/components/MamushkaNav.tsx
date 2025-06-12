@@ -74,24 +74,12 @@ const tree: Node[] = [
         ]
       },
       {
-        label: <span className="font-lato">Local 2</span>,
-        children: [
-          { label: '1 vez a la semana', children: [{ label: '$25.000', qrKey: '1_semana' }] },
-          { label: '2 veces a la semana', children: [{ label: '$32.000', qrKey: '2_semanas' }] },
-          { label: '3 veces a la semana', children: [{ label: '$35.000', qrKey: '3_semanas' }] },
-          { label: '4 veces a la semana', children: [{ label: '$38.000', qrKey: '4_semanas' }] },
-          { label: 'Libre', children: [{ label: '$42.000', qrKey: 'libre' }] },
-          ]
-        },
+        label: <span className="font-lato">La Horqueta</span>,
+        url: 'https://wa.me/5491134481256'
+      },
       {
-        label: <span className="font-lato">Local 3</span>,
-        children: [
-          { label: '1 vez a la semana', children: [{ label: '$25.000', qrKey: '1_semana' }] },
-          { label: '2 veces a la semana', children: [{ label: '$32.000', qrKey: '2_semanas' }] },
-          { label: '3 veces a la semana', children: [{ label: '$35.000', qrKey: '3_semanas' }] },
-          { label: '4 veces a la semana', children: [{ label: '$38.000', qrKey: '4_semanas' }] },
-          { label: 'Libre', children: [{ label: '$42.000', qrKey: 'libre' }] },
-        ]
+        label: <span className="font-lato">VILLANUEVA</span>,
+        url: 'https://wa.me/5491134481256'
       },
     ]
   },
