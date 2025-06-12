@@ -5,10 +5,12 @@ import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { toast } from 'sonner' // opcional, si quieres notificaciones
+import { toast } from 'sonner' 
+import { useRouter } from 'next/navigation'
 
 export default function LoginForm({ onClose }: { onClose: () => void }) {
   const { login } = useAuth()
+  const router = useRouter()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -19,7 +21,8 @@ export default function LoginForm({ onClose }: { onClose: () => void }) {
     try {
       await login(username, password)
       // Al hacer login exitoso, onClose cierra el modal
-      onClose()
+      if (onClose) onClose()    // si llegó onClose lo ejecuta...
+      else router.push('/profile')
     } catch (err: any) {
       console.error('Error al iniciar sesión:', err)
       toast.error('Usuario o contraseña incorrectos.')
