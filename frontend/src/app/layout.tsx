@@ -17,9 +17,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
        {/* — Slider de fondo */}
        <BackgroundSlider
          images={[
-           '/images/bg1.jpg',
-           '/images/bg2.jpg',
-           '/images/bg3.jpg',
+           '/fondo1.jpg',
+           '/fondo2.jpg',
+           
          ]}
          intervalMs={10000}
        />
