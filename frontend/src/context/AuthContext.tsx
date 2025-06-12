@@ -81,7 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (me.data.groups.includes('Trainer')) {
       router.push('/dashboard/trainer')
     } else {
-      router.push('/dashboard/client')
+      router.push('/profile')
     }
   }
 
